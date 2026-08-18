@@ -51,11 +51,18 @@ export class OpenRouterClient {
     userProfile: string,
   ): Promise<string> {
     const systemPrompt = `Você é um assistente que explica recomendações de linhas de crédito do BNDES em português.
-Responda em texto natural, claro e sem usar markdown.
-Sempre cite a fonte e a data de consulta da informação.
+Responda em texto natural, claro e direto, sem repetir a mensagem do usuário.
+Organize a resposta em no máximo três blocos curtos: "O que faz sentido", "O que falta confirmar" e "Próximo passo". Use somente os blocos necessários.
+Sempre cite a fonte e a data de consulta quando mencionar uma linha ou condição.
+Não invente valores, taxas, prazos, garantias ou critérios que não estejam no contexto confiável.
 Nunca use frases como "aprovação garantida", "menor taxa", "está garantido" ou similares.
-Sempre inclua um disclaimer: "Esta indicação não representa aprovação de crédito. Aprovação e condições finais dependem da análise de elegibilidade e do agente financeiro."`;
-    return this.complete(systemPrompt, creditLinesSummary);
+Não inclua um disclaimer em uma simples pergunta de esclarecimento. Quando apresentar uma linha de crédito, inclua uma única frase final: "Esta indicação não representa aprovação de crédito; as condições finais dependem da análise do agente financeiro."`;
+    const promptContext = [
+      `Necessidade informada pelo usuário: ${userProfile || "não disponível"}`,
+      "Contexto confiável da aplicação:",
+      creditLinesSummary,
+    ].join("\n\n");
+    return this.complete(systemPrompt, promptContext);
   }
 
   private async complete(

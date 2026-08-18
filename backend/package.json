@@ -9,7 +9,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx tests/rulesEngine.test.ts && tsx tests/rulesEngine.additional.test.ts && tsx tests/openRouterClient.test.ts && tsx tests/outputValidator.test.ts && tsx tests/chatService.e2e.test.ts && tsx tests/app.http.test.ts"
+    "test": "tsx tests/rulesEngine.test.ts && tsx tests/rulesEngine.additional.test.ts && tsx tests/evaluation.test.ts && tsx tests/openRouterClient.test.ts && tsx tests/outputValidator.test.ts && tsx tests/chatService.e2e.test.ts && tsx tests/app.http.test.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

@@ -58,8 +58,8 @@ export class ChatService {
       // Passo 2: recusar premissa inadequada (caso 4)
       if (profile.asksGuaranteeOrRate) {
         const response = await this.client.explainRecommendation(
-          `O usuário perguntou: "${request.message}"\n\nEsta pergunta pressupõe aprovação garantida ou menor taxa. Você deve recusar a premissa e explicar por que o BNDES não pode garantir essas coisas.`,
-          "",
+          `Modo: recusar premissa. Responda em no máximo dois parágrafos curtos. Explique que aprovação e taxa dependem da análise do agente financeiro e redirecione para a finalidade do financiamento. Não repita a pergunta inteira nem liste linhas sem contexto.`,
+          request.message,
         );
         logger.info("Premise refused", { conversationId, requestId });
         return this.finalizeResponse(conversationId, response, []);
@@ -84,7 +84,7 @@ export class ChatService {
           profile,
         );
         const response = await this.client.explainRecommendation(
-          questionSummary,
+          `Modo: esclarecer. Faça exatamente uma pergunta objetiva, aproveitando o contexto já informado. Não repita a introdução, não liste todas as possibilidades e não inclua disclaimer nesta mensagem. Pergunta necessária: ${questionSummary}`,
           request.message,
         );
         logger.info("Asking for more info", {
@@ -98,7 +98,7 @@ export class ChatService {
       // Passo 5: se nenhum candidato (no_match)
       if (recommendation.status === "no_match") {
         const response = await this.client.explainRecommendation(
-          "Não encontrei linhas de crédito BNDES que correspondam à descrição fornecida. Pode tentar descrever melhor a necessidade?",
+          "Modo: sem correspondência. Explique em duas frases que nenhuma linha foi relacionada com segurança ao pedido atual e faça uma pergunta objetiva para descobrir a finalidade. Não invente uma linha alternativa.",
           request.message,
         );
         logger.info("No match found", { conversationId, requestId });
