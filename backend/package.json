@@ -1,0 +1,20 @@
+{
+  "name": "bndes-info-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API Backend - assistente de linhas de credito BNDES (Node/Express/TypeScript)",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "TODO - ex: tsx watch src/server.ts",
+    "build": "TODO - ex: tsc",
+    "start": "TODO - ex: node dist/server.js",
+    "test": "TODO - ex: node --test"
+  },
+  "dependencies": {
+    "_comentario": "Dependencias planejadas, ainda nao instaladas: express, dotenv, cors, pino (logging), openai (cliente compativel com OpenRouter)"
+  },
+  "devDependencies": {
+    "_comentario": "typescript, tsx (dev runtime), @types/node, @types/express, @types/cors"
+  }
+}

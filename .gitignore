@@ -1,0 +1,16 @@
+# dependências
+node_modules/
+
+# build
+dist/
+build/
+
+# segredos
+.env
+.env.*.local
+
+# logs
+*.log
+
+# editor/os
+.DS_Store

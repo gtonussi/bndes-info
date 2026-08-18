@@ -1,0 +1,58 @@
+{
+  "_schema_version": "1.0",
+  "_instrucoes": "Preencher cada campo com informação verificada manualmente em bndes.gov.br. Nunca copiar de respostas de IA sem checar a fonte oficial. 'consulted_at' é a data em que VOCÊ conferiu a página, não a data de atualização dela.",
+  "linhas": [
+    {
+      "id": "finame",
+      "name": "TODO - ex: BNDES Finame",
+      "target_audience": "TODO - para quem serve (ex: empresas de todos os portes que compram máquinas/equipamentos)",
+      "what_it_finances": "TODO - o que pode ser financiado",
+      "conditions_limitations": "TODO - condições/limitações importantes (ex: equipamento novo, nacional, credenciado)",
+      "how_to_apply": "TODO - como solicitar (ex: via agente financeiro credenciado)",
+      "source": {
+        "url": "TODO - link exato da página oficial do produto",
+        "publisher": "BNDES",
+        "consulted_at": "TODO - YYYY-MM-DD"
+      }
+    },
+    {
+      "id": "credito-pme",
+      "name": "TODO - ex: BNDES Crédito Pequenas e Médias Empresas",
+      "target_audience": "TODO",
+      "what_it_finances": "TODO - ex: capital de giro / manutenção da atividade",
+      "conditions_limitations": "TODO",
+      "how_to_apply": "TODO",
+      "source": {
+        "url": "TODO",
+        "publisher": "BNDES",
+        "consulted_at": "TODO - YYYY-MM-DD"
+      }
+    },
+    {
+      "id": "credito-servicos-4-0",
+      "name": "TODO - ex: BNDES Crédito Serviços 4.0",
+      "target_audience": "TODO",
+      "what_it_finances": "TODO - ex: serviços tecnológicos, digitalização, modernização",
+      "conditions_limitations": "TODO",
+      "how_to_apply": "TODO",
+      "source": {
+        "url": "TODO",
+        "publisher": "BNDES",
+        "consulted_at": "TODO - YYYY-MM-DD"
+      }
+    },
+    {
+      "id": "credito-digital",
+      "name": "TODO - ex: BNDES Crédito Digital",
+      "target_audience": "TODO - ex: MEIs, micro, pequenas e médias empresas",
+      "what_it_finances": "TODO",
+      "conditions_limitations": "TODO",
+      "how_to_apply": "TODO - ex: contratado digitalmente via agente financeiro credenciado",
+      "source": {
+        "url": "TODO",
+        "publisher": "BNDES",
+        "consulted_at": "TODO - YYYY-MM-DD"
+      }
+    }
+  ]
+}

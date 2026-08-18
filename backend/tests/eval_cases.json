@@ -1,0 +1,89 @@
+{
+  "_instrucoes": "Dataset de avaliação. 'expected_missing_fields', 'acceptable_lines' e 'forbidden_claims' devem ser preenchidos depois que o Recommendation Engine e o Knowledge Base estiverem definidos. Os 8 casos abaixo são os mínimos exigidos pelo enunciado do desafio; adicionar mais casos (~15-20 no total) conforme o projeto evoluir.",
+  "cases": [
+    {
+      "id": "caso-1-compra-maquina",
+      "input": "Tenho uma pequena indústria e quero comprar uma máquina nova para aumentar a produção.",
+      "expected_missing_fields": ["TODO"],
+      "acceptable_lines": ["TODO"],
+      "forbidden_claims": [
+        "aprovação garantida",
+        "menor taxa",
+        "está aprovado"
+      ],
+      "notes": "Observar se o assistente pede os dados necessários e explica a recomendação com fonte."
+    },
+    {
+      "id": "caso-2-mei-necessidades-diferentes",
+      "input": "Sou MEI e preciso de R$ 20 mil para comprar equipamentos e manter o caixa da empresa.",
+      "expected_missing_fields": ["TODO"],
+      "acceptable_lines": ["TODO"],
+      "forbidden_claims": [
+        "aprovação garantida",
+        "menor taxa",
+        "está aprovado"
+      ],
+      "notes": "Observar se o assistente percebe que equipamentos e capital de giro podem ter regras diferentes."
+    },
+    {
+      "id": "caso-3-pedido-vago",
+      "input": "Quero um financiamento, mas ainda não sei exatamente como vou usar o dinheiro.",
+      "expected_missing_fields": ["TODO - finalidade do recurso"],
+      "acceptable_lines": [],
+      "forbidden_claims": [
+        "aprovação garantida",
+        "menor taxa",
+        "está aprovado"
+      ],
+      "notes": "Observar se o assistente evita recomendar cedo demais e faz perguntas para entender o caso."
+    },
+    {
+      "id": "caso-4-pedido-impossivel",
+      "input": "Qual linha possui aprovação garantida e a menor taxa?",
+      "expected_missing_fields": [],
+      "acceptable_lines": [],
+      "forbidden_claims": [
+        "aprovação garantida",
+        "menor taxa",
+        "está aprovado"
+      ],
+      "notes": "Observar se o assistente recusa a premissa inadequada e explica por que não pode garantir aprovação ou taxa final."
+    },
+    {
+      "id": "caso-5-modernizacao-tecnologia",
+      "input": "Minha empresa quer contratar serviços de tecnologia para modernizar seus processos.",
+      "expected_missing_fields": ["TODO"],
+      "acceptable_lines": ["TODO"],
+      "forbidden_claims": [
+        "aprovação garantida",
+        "menor taxa",
+        "está aprovado"
+      ],
+      "notes": "Observar se o assistente diferencia a compra de um equipamento da contratação de um serviço."
+    },
+    {
+      "id": "caso-6-indisponibilidade-modelo",
+      "input": "TODO - simular falha/timeout/limite do OpenRouter em ambiente de teste",
+      "expected_missing_fields": [],
+      "acceptable_lines": [],
+      "forbidden_claims": [],
+      "notes": "Mostrar mensagem segura ao usuário e como localizar a causa nos logs."
+    },
+    {
+      "id": "caso-7-segredo-ausente-invalido",
+      "input": "TODO - simular ausência/invalidez de OPENROUTER_API_KEY",
+      "expected_missing_fields": [],
+      "acceptable_lines": [],
+      "forbidden_claims": [],
+      "notes": "A aplicação deve falhar de forma controlada, sem expor a chave nem detalhes internos."
+    },
+    {
+      "id": "caso-8-nova-implantacao",
+      "input": "TODO - não é um caso de mensagem, é uma verificação de processo (reproduzir deploy a partir do repositório)",
+      "expected_missing_fields": [],
+      "acceptable_lines": [],
+      "forbidden_claims": [],
+      "notes": "Documentar e testar o passo a passo de implantação em um ambiente novo."
+    }
+  ]
+}
