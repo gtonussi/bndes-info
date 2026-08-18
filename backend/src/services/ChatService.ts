@@ -11,6 +11,7 @@ import { validateOutput } from "../validators/outputValidator.js";
 
 export interface ChatRequest {
   message: string;
+  conversationId?: string;
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
@@ -31,7 +32,8 @@ export class ChatService {
   }
 
   async chat(request: ChatRequest): Promise<ChatResponse> {
-    const conversationId = Math.random().toString(36).slice(2, 11);
+    const conversationId =
+      request.conversationId?.trim() || Math.random().toString(36).slice(2, 11);
     const requestId = Math.random().toString(36).slice(2, 11);
 
     try {
@@ -42,7 +44,8 @@ export class ChatService {
       });
 
       // Passo 1: extrair perfil da empresa
-      const profile = await this.client.extractProfile(request.message);
+      const extractionInput = this.buildExtractionInput(request);
+      const profile = await this.client.extractProfile(extractionInput);
       logger.debug("Profile extracted", { conversationId, requestId, profile });
 
       // Passo 2: recusar premissa inadequada (caso 4)
@@ -52,7 +55,7 @@ export class ChatService {
           "",
         );
         logger.info("Premise refused", { conversationId, requestId });
-        return this.toResponse(conversationId, response, []);
+        return this.finalizeResponse(conversationId, response, []);
       }
 
       // Passo 3: passar pelo Recommendation Engine
@@ -73,7 +76,7 @@ export class ChatService {
           requestId,
           missingFields: recommendation.missingFields,
         });
-        return this.toResponse(conversationId, response, []);
+        return this.finalizeResponse(conversationId, response, []);
       }
 
       // Passo 5: se nenhum candidato (no_match)
@@ -83,7 +86,7 @@ export class ChatService {
           request.message,
         );
         logger.info("No match found", { conversationId, requestId });
-        return this.toResponse(conversationId, response, []);
+        return this.finalizeResponse(conversationId, response, []);
       }
 
       // Passo 6: montar contexto das linhas recomendadas e gerar explicação
@@ -100,15 +103,6 @@ export class ChatService {
       );
 
       // Passo 7: validar a resposta
-      const validated = validateOutput(explanation, this.creditLines);
-      if (!validated.isValid) {
-        logger.warn("Output validation failed", {
-          conversationId,
-          requestId,
-          violations: validated.violations,
-        });
-      }
-
       const citations = recommendation.candidates.map((cand) => {
         const line = this.creditLines.find((l) => l.id === cand.id)!;
         return { url: line.source.url, date: line.source.consultedAt };
@@ -119,7 +113,12 @@ export class ChatService {
         requestId,
         candidateCount: recommendation.candidates.length,
       });
-      return this.toResponse(conversationId, explanation, citations);
+      return this.finalizeResponse(
+        conversationId,
+        explanation,
+        citations,
+        requestId,
+      );
     } catch (error) {
       logger.error("Chat error", { conversationId, requestId, error });
       throw error;
@@ -143,6 +142,42 @@ export class ChatService {
 
     const fields = missingFields.map((f) => fieldLabels[f] || f).join(", ");
     return `Para refinar as recomendações, você poderia esclarecer: ${fields}?`;
+  }
+
+  private buildExtractionInput(request: ChatRequest): string {
+    if (!request.conversationHistory?.length) return request.message;
+
+    const history = request.conversationHistory
+      .slice(-10)
+      .map(
+        (turn) =>
+          `${turn.role === "user" ? "Usuário" : "Assistente"}: ${turn.content}`,
+      )
+      .join("\n");
+    return `Histórico da conversa (use apenas como contexto; não invente fatos):\n${history}\nUsuário: ${request.message}`;
+  }
+
+  private finalizeResponse(
+    conversationId: string,
+    message: string,
+    citations: Array<{ url: string; date: string }>,
+    requestId?: string,
+  ): ChatResponse {
+    const validated = validateOutput(message, this.creditLines);
+    if (!validated.isValid) {
+      logger.warn("Output validation failed", {
+        conversationId,
+        requestId,
+        violations: validated.violations,
+      });
+      return {
+        conversationId,
+        message:
+          "Não consegui gerar uma explicação segura para esta solicitação. Consulte as fontes oficiais do BNDES e confirme as condições com um agente financeiro.",
+        citations,
+      };
+    }
+    return { conversationId, message: validated.message, citations };
   }
 
   private toResponse(

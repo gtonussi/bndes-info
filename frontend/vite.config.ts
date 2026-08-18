@@ -1,1 +1,13 @@
-// TODO: configuracao do Vite (plugin React). Dev server deve apontar para o backend local via proxy ou variavel VITE_API_URL.
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+	plugins: [react()],
+	server: {
+		port: 5173,
+		proxy: {
+			"/chat": "http://localhost:3000",
+			"/health": "http://localhost:3000",
+		},
+	},
+});

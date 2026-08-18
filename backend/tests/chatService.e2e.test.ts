@@ -131,10 +131,19 @@ await run("Caso 1: Compra de máquina", async () => {
   const response = await service.chat({
     message:
       "Tenho uma pequena indústria e quero comprar uma máquina nova para aumentar a produção.",
+    conversationId: "conversa-teste",
+    conversationHistory: [
+      { role: "user", content: "Preciso financiar uma expansão." },
+      { role: "assistant", content: "Qual é a finalidade do financiamento?" },
+    ],
   });
 
   assert.ok(response.message, "Deve ter resposta");
-  assert.ok(response.conversationId, "Deve ter ID de conversa");
+  assert.equal(
+    response.conversationId,
+    "conversa-teste",
+    "Deve preservar o ID de conversa",
+  );
 });
 
 await run("Caso 3: Pedido vago", async () => {
