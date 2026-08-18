@@ -1,5 +1,7 @@
 # bndes-info
 
+![Happy Path 1](./docs/happy-path-1.png)
+
 Assistente que ajuda empresas a entender quais linhas de crédito do BNDES podem fazer sentido para sua necessidade. Não aprova crédito, não define taxa nem garante condições — apenas orienta com base em fontes oficiais.
 
 Stack: backend Node/Express em TypeScript (`backend/`), frontend React + Vite em TypeScript (`frontend/`).
