@@ -1,10 +1,12 @@
 # Diagramas de Arquitetura
 
-Este arquivo e uma referencia para recriar os diagramas no Draw.io. Cada bloco usa caixas e setas em texto. O foco e mostrar que a LLM extrai dados estruturados e redige respostas, enquanto a decisao de recomendacao e os guardrails permanecem determinísticos no backend.
+## Representação Visual
+
+<a href="VisualDiagram.png"><img src="VisualDiagram.png" alt="Representação visual do diagrama de arquitetura" width="400"></a>
 
 ## 1. Fluxo de IA: da mensagem do usuario ate a resposta
 
-Use este diagrama para apresentar o pipeline completo de Engenharia de IA. As faixas podem virar containers no Draw.io: Frontend, API/Orquestracao, Dados e Regras, e OpenRouter/LLM.
+Apresenta o pipeline completo de Engenharia de IA:
 
 ```text
 +--------------------+       +--------------------------+       +--------------------------+
@@ -123,8 +125,6 @@ Use este diagrama para apresentar o pipeline completo de Engenharia de IA. As fa
                                              +------------------------------------+
 ```
 
-Pontos para destacar no Draw.io:
-
 - A knowledge base e local, versionada e composta por fontes oficiais do BNDES; nao ha banco vetorial nem embeddings.
 - O modelo nao escolhe a linha de credito. Ele extrai dados do texto e redige uma explicacao baseada no resultado decidido pelo codigo.
 - O modelo principal possui timeout e pode usar um modelo fallback.
@@ -132,7 +132,7 @@ Pontos para destacar no Draw.io:
 
 ### Versao alternativa do diagrama 1: leitura guiada
 
-Esta e uma segunda representacao do mesmo fluxo. Ela foi organizada como uma historia em sete passos, para facilitar a explicacao em uma apresentacao. A versao anterior pode continuar como referencia tecnica detalhada; para o Draw.io, esta versao tende a ser mais simples de ler da esquerda para a direita.
+Esta e uma segunda representacao do mesmo fluxo. Ela foi organizada como uma historia em sete passos, para ser uma versão facilitada.
 
 ```text
     1. USUARIO EXPLICA A NECESSIDADE
@@ -230,17 +230,15 @@ Esta e uma segunda representacao do mesmo fluxo. Ela foi organizada como uma his
     +-----------------------------------------------+       +-----------------------------------------+
 ```
 
-Roteiro curto para explicar este desenho:
-
 1. A pessoa descreve o que precisa em linguagem natural.
 2. A primeira chamada de LLM so organiza essa mensagem em campos controlados.
 3. O motor de regras, usando a base oficial do BNDES, toma a decisao sem delegar elegibilidade ao modelo.
 4. A segunda chamada de LLM apenas transforma a decisao em uma resposta clara para a pessoa.
 5. Antes de responder, o backend verifica promessas indevidas e links que nao fazem parte das fontes oficiais.
 
-### Versao recomendada para apresentacao: fluxo vertical
+### Versão de fluxo vertical
 
-Esta terceira leitura do diagrama 1 preserva o mesmo funcionamento, mas reduz a quantidade de setas paralelas. No Draw.io, use uma coluna central de sete caixas e apenas quatro saidas pequenas no passo de decisao.
+Esta terceira leitura do diagrama 1 preserva o mesmo funcionamento, mas reduz a quantidade de setas paralelas.
 
 ```text
     +------------------------------------------------------------+
@@ -311,11 +309,9 @@ Esta terceira leitura do diagrama 1 preserva o mesmo funcionamento, mas reduz a 
     +------------------------------------------------------------+
 ```
 
-Frase central para apresentar: "A LLM entende e explica; o codigo decide e valida."
-
 ## 2. Conversao: texto do usuario para JSON e JSON para resposta
 
-Use este diagrama para detalhar a parte mais ligada a LLM. Ele separa claramente o JSON que a LLM produz do JSON HTTP que a aplicacao devolve ao frontend.
+Detalha a parte mais ligada a LLM. Ele separa claramente o JSON que a LLM produz do JSON HTTP que a aplicacao devolve ao frontend.
 
 ```text
 +----------------------------------------------------------------------------------+
@@ -439,16 +435,14 @@ Use este diagrama para detalhar a parte mais ligada a LLM. Ele separa claramente
 +----------------------------------------------------------------------------------+
 ```
 
-Pontos para destacar no Draw.io:
-
-- Ha duas chamadas com objetivos diferentes: LLM #1 transforma texto em JSON; LLM #2 transforma uma decisao controlada em linguagem natural.
-- O `CompanyProfile` e uma fronteira de seguranca: o motor de regras usa campos tipados, nao interpreta texto livre.
+- Há duas chamadas com objetivos diferentes: LLM #1 transforma texto em JSON; LLM #2 transforma uma decisao controlada em linguagem natural.
+- O `CompanyProfile` é uma fronteira de seguranca: o motor de regras usa campos tipados, nao interpreta texto livre.
 - `RecommendationResult` determina tanto a proxima pergunta quanto quais fatos podem entrar no prompt de resposta.
-- As citacoes vem da knowledge base selecionada pelo motor de regras, nao de URLs criadas pelo modelo.
+- As citações vêm da knowledge base selecionada pelo motor de regras, nao de URLs criadas pelo modelo.
 
 ## 3. Funcionamento da aplicacao: frontend e backend
 
-Use este diagrama para explicar a comunicacao entre as duas aplicacoes. Ele complementa os diagramas de IA com o ciclo HTTP e o estado de conversa.
+Explica a comunicação entre as duas aplições. Ele complementa os diagramas de IA com o ciclo HTTP e o estado de conversa.
 
 ```text
 +==================================================================================================+
@@ -554,8 +548,6 @@ Use este diagrama para explicar a comunicacao entre as duas aplicacoes. Ele comp
     | - historico enviado e limitado pela rota    |       | - processa somente o pedido atual     |
     +---------------------------------------------+       +---------------------------------------+
 ```
-
-Pontos para destacar no Draw.io:
 
 - O frontend nunca acessa o OpenRouter diretamente; a chave fica no backend.
 - A resposta HTTP possui texto e citacoes, que o frontend exibe como links oficiais.
