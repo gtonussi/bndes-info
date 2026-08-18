@@ -26,6 +26,7 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   useEffect(
     () => endRef.current?.scrollIntoView({ behavior: "smooth" }),
     [messages, isSending],
@@ -37,6 +38,7 @@ export function ChatWindow({
     if (!message || isSending) return;
     setDraft("");
     await onSend(message);
+    composerRef.current?.focus();
   }
 
   return (
@@ -47,7 +49,7 @@ export function ChatWindow({
         </div>
         <span className="chat-label">CONSULTA GUIADA</span>
       </div>
-      <div className="messages" aria-live="polite">
+      <div className="messages" aria-live="polite" aria-busy={isSending}>
         {messages.length === 0 && (
           <div className="welcome">
             <span className="welcome-index">A</span>
@@ -62,6 +64,7 @@ export function ChatWindow({
                 <button
                   key={suggestion}
                   type="button"
+                  disabled={isSending}
                   onClick={() => void onSend(suggestion)}
                 >
                   {suggestion}
@@ -75,7 +78,11 @@ export function ChatWindow({
           <MessageBubble key={`${message.role}-${index}`} message={message} />
         ))}
         {isSending && (
-          <div className="typing" aria-label="Assistente digitando">
+          <div
+            className="typing"
+            role="status"
+            aria-label="Assistente consultando"
+          >
             <span />
             <span />
             <span /> Consultando informações oficiais
@@ -92,11 +99,13 @@ export function ChatWindow({
       <form className="composer" onSubmit={submit}>
         <textarea
           value={draft}
+          ref={composerRef}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Descreva o que sua empresa precisa..."
           rows={1}
           disabled={isSending}
           aria-label="Mensagem"
+          maxLength={4000}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();

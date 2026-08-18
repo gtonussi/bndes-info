@@ -48,26 +48,142 @@ bndes-info/
             └── MessageBubble.tsx     # mensagem com citações oficiais
 ```
 
-## Como instalar e rodar
+## Rodando localmente
 
-Pré-requisitos: Node.js 20+.
+### Pré-requisitos
 
-```bash
-# Backend
-cd backend
-npm install
-npm run build
-cp .env.example .env   # preencher OPENROUTER_API_KEY e OPENROUTER_MODEL_PRIMARY
-npm run dev             # sobe a API local (ex: http://localhost:3000)
+- Windows com PowerShell, Node.js 20 ou superior e npm.
+- Uma chave válida do OpenRouter.
+- Um model ID disponível na sua conta OpenRouter.
 
-# Frontend (em outro terminal)
-cd frontend
-npm install
-npm run build
-npm run dev             # sobe o Vite dev server (ex: http://localhost:5173)
+Confirme as versões antes de começar:
+
+```powershell
+node --version
+npm --version
 ```
 
-O frontend usa `VITE_API_URL`. Em desenvolvimento, deixe a variável vazia para usar o proxy do Vite para `http://localhost:3000`. Em produção, informe a URL pública do backend. A chave do OpenRouter é usada exclusivamente no backend.
+### 1. Configurar o backend
+
+Abra o PowerShell na raiz do repositório (`bndes-info`) e execute:
+
+```powershell
+Set-Location .\backend
+npm install
+Copy-Item .env.example .env
+notepad .env
+```
+
+No arquivo `backend/.env`, preencha pelo menos:
+
+```dotenv
+OPENROUTER_API_KEY=sua-chave-real
+OPENROUTER_MODEL_PRIMARY=seu-model-id-real
+```
+
+As demais variáveis já possuem valores locais adequados:
+
+| Variável                    | Uso                                | Padrão                         |
+| --------------------------- | ---------------------------------- | ------------------------------ |
+| `OPENROUTER_API_KEY`        | Chave usada somente pelo backend   | obrigatório                    |
+| `OPENROUTER_MODEL_PRIMARY`  | Modelo principal do OpenRouter     | obrigatório                    |
+| `OPENROUTER_MODEL_FALLBACK` | Modelo usado se o principal falhar | opcional                       |
+| `OPENROUTER_TIMEOUT_MS`     | Timeout de cada chamada            | `15000`                        |
+| `OPENROUTER_BASE_URL`       | Endpoint do OpenRouter             | `https://openrouter.ai/api/v1` |
+| `PORT`                      | Porta do backend                   | `3000`                         |
+| `LOG_LEVEL`                 | Nível dos logs                     | `info`                         |
+
+O backend carrega `.env` automaticamente ao iniciar. Nunca envie esse arquivo para o Git ou coloque a chave no frontend.
+
+### 2. Configurar o frontend
+
+Abra um segundo terminal na raiz do repositório e execute:
+
+```powershell
+Set-Location .\frontend
+npm install
+Copy-Item .env.example .env
+```
+
+Para desenvolvimento local, mantenha `VITE_API_URL` vazio:
+
+```dotenv
+VITE_API_URL=
+```
+
+Assim, o Vite encaminha `/chat` e `/health` para `http://localhost:3000`. Só preencha `VITE_API_URL` quando o frontend precisar chamar uma API publicada fora do proxy local.
+
+### 3. Iniciar os serviços
+
+No primeiro terminal, ainda em `backend`:
+
+```powershell
+npm run dev
+```
+
+No segundo terminal, ainda em `frontend`:
+
+```powershell
+npm run dev
+```
+
+Abra <http://localhost:5173> no navegador. O backend ficará disponível em <http://localhost:3000>.
+
+Use exatamente `npm run dev` a partir da pasta correta. Neste ambiente Windows, passar `--host 127.0.0.1` pelo npm pode ser interpretado como um caminho pelo Vite e resultar em `404`.
+
+### 4. Verificar a instalação
+
+Com os dois serviços em execução, rode no PowerShell:
+
+```powershell
+Invoke-RestMethod http://localhost:3000/health
+Invoke-RestMethod http://localhost:5173/health
+```
+
+Com uma chave configurada, as duas respostas devem indicar `status: ok` e `openRouterApiKey: present`. Sem a chave, o backend não inicia porque a configuração é validada no boot.
+
+Para testar diretamente o endpoint de conversa:
+
+```powershell
+Invoke-RestMethod `
+    -Uri http://localhost:3000/chat `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body '{"message":"Quero comprar uma máquina para minha empresa."}'
+```
+
+O resultado esperado é um JSON com `conversationId`, `message` e `citations`. A resposta pode pedir dados adicionais, como origem do equipamento e credenciamento BNDES.
+
+### Testes e build
+
+Backend:
+
+```powershell
+Set-Location .\backend
+npm test
+npm run build
+```
+
+Frontend:
+
+```powershell
+Set-Location .\frontend
+npm run build
+npm run preview
+```
+
+O `npm test` do backend não chama o OpenRouter real: os testes usam transportes mockados e cobrem Engine, Gateway, guardrails, orquestração e contratos HTTP.
+
+### Problemas comuns
+
+- **`OPENROUTER_API_KEY não configurada`**: confirme que `backend/.env` existe, está na pasta `backend` e contém uma chave não vazia.
+- **`OPENROUTER_MODEL_PRIMARY não configurado`**: preencha um model ID válido no OpenRouter.
+- **Frontend em branco ou `404`**: encerre o Vite, entre em `frontend` e execute apenas `npm run dev`.
+- **Erro de conexão no chat**: confirme que o backend está rodando na porta `3000` e que `frontend/.env` mantém `VITE_API_URL=` vazio.
+- **Porta ocupada**: encerre o processo que usa `3000` ou `5173`, ou altere `PORT` no backend e o proxy em `frontend/vite.config.ts` de forma correspondente.
+- **Timeout do OpenRouter**: verifique conectividade, validade da chave, disponibilidade do modelo e `OPENROUTER_TIMEOUT_MS`.
+
+O frontend usa `VITE_API_URL` apenas para selecionar o destino HTTP. A chave do OpenRouter nunca deve ser configurada no frontend.
 
 ## API
 

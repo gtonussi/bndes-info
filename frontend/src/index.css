@@ -20,6 +20,12 @@ textarea {
 button {
   cursor: pointer;
 }
+button:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid #de5d3e;
+  outline-offset: 3px;
+}
 .app-shell {
   min-height: 100vh;
   padding: 28px clamp(18px, 5vw, 76px) 20px;
@@ -253,6 +259,10 @@ h1 {
   border-color: #de5d3e;
   color: #b54a31;
   background: #fffaf0;
+}
+.suggestions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 .suggestions button span {
   margin-left: 13px;

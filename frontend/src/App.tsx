@@ -2,6 +2,14 @@ import { useState } from "react";
 import { ChatWindow, type ChatMessage } from "./components/ChatWindow";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
+const REQUEST_TIMEOUT_MS = 30_000;
+
+interface ChatApiPayload {
+  message?: string;
+  citations?: ChatMessage["citations"];
+  conversationId?: string;
+  error?: string;
+}
 
 export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -18,22 +26,32 @@ export default function App() {
     setError(undefined);
     setIsSending(true);
 
+    const controller = new AbortController();
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      REQUEST_TIMEOUT_MS,
+    );
+
     try {
       const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           message: content,
           conversationId,
           conversationHistory: history,
         }),
       });
-      const payload = (await response.json()) as {
-        message?: string;
-        citations?: ChatMessage["citations"];
-        conversationId?: string;
-        error?: string;
-      };
+      const responseText = await response.text();
+      let payload: ChatApiPayload = {};
+      try {
+        payload = responseText
+          ? (JSON.parse(responseText) as ChatApiPayload)
+          : {};
+      } catch {
+        throw new Error("O servidor retornou uma resposta inválida.");
+      }
       if (!response.ok)
         throw new Error(
           payload.error ?? "Não foi possível consultar o assistente.",
@@ -49,12 +67,16 @@ export default function App() {
         },
       ]);
     } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Não foi possível consultar o assistente.",
-      );
+      const message =
+        requestError instanceof DOMException &&
+        requestError.name === "AbortError"
+          ? "A consulta demorou mais que o esperado. Tente novamente."
+          : requestError instanceof Error
+            ? requestError.message
+            : "Não foi possível consultar o assistente.";
+      setError(message);
     } finally {
+      window.clearTimeout(timeout);
       setIsSending(false);
     }
   }
