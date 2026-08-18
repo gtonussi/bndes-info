@@ -8,10 +8,6 @@
     "build": "TODO - tsc -b && vite build",
     "preview": "TODO - vite preview"
   },
-  "dependencies": {
-    "_comentario": "Dependencias planejadas, ainda nao instaladas: react, react-dom"
-  },
-  "devDependencies": {
-    "_comentario": "typescript, vite, @vitejs/plugin-react, @types/react, @types/react-dom, tailwindcss, postcss, autoprefixer"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

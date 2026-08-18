@@ -1,2 +1,73 @@
-// TODO: ler e validar backend/data/linhas_credito.json (as 4 linhas de credito).
-// TODO: definir interface CreditLine espelhando o schema do JSON.
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+export interface CreditLineSource {
+  url: string;
+  publisher: string;
+  consultedAt: string;
+}
+
+export interface CreditLine {
+  id: string;
+  name: string;
+  targetAudience: string;
+  whatItFinances: string;
+  conditionsLimitations: string;
+  howToApply: string;
+  source: CreditLineSource;
+}
+
+interface RawCreditLine {
+  id: string;
+  name: string;
+  target_audience: string;
+  what_it_finances: string;
+  conditions_limitations: string;
+  how_to_apply: string;
+  source: { url: string; publisher: string; consulted_at: string };
+}
+
+interface RawCreditLinesFile {
+  linhas: RawCreditLine[];
+}
+
+// backend/src/knowledgeBase/../../data/linhas_credito.json
+const DEFAULT_DATA_PATH = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "data",
+  "linhas_credito.json",
+);
+
+function toCreditLine(raw: RawCreditLine): CreditLine {
+  return {
+    id: raw.id,
+    name: raw.name,
+    targetAudience: raw.target_audience,
+    whatItFinances: raw.what_it_finances,
+    conditionsLimitations: raw.conditions_limitations,
+    howToApply: raw.how_to_apply,
+    source: {
+      url: raw.source.url,
+      publisher: raw.source.publisher,
+      consultedAt: raw.source.consulted_at,
+    },
+  };
+}
+
+export function loadCreditLines(
+  path: string = DEFAULT_DATA_PATH,
+): CreditLine[] {
+  const raw = readFileSync(path, "utf-8");
+  const parsed = JSON.parse(raw) as RawCreditLinesFile;
+
+  if (!Array.isArray(parsed.linhas)) {
+    throw new Error(
+      'linhas_credito.json malformado: campo "linhas" ausente ou inválido.',
+    );
+  }
+
+  return parsed.linhas.map(toCreditLine);
+}
