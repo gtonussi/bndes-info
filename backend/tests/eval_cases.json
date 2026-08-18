@@ -1,11 +1,14 @@
 {
-  "_instrucoes": "Dataset de avaliação. 'expected_missing_fields', 'acceptable_lines' e 'forbidden_claims' devem ser preenchidos depois que o Recommendation Engine e o Knowledge Base estiverem definidos. Os 8 casos abaixo são os mínimos exigidos pelo enunciado do desafio; adicionar mais casos (~15-20 no total) conforme o projeto evoluir.",
+  "_instrucoes": "Dataset de avaliação. 'expected_missing_fields', 'acceptable_lines' e 'forbidden_claims' devem ser preenchidos depois que o Recommendation Engine e o Knowledge Base estiverem definidos. Os 8 casos abaixo são os mínimos exigidos",
   "cases": [
     {
       "id": "caso-1-compra-maquina",
       "input": "Tenho uma pequena indústria e quero comprar uma máquina nova para aumentar a produção.",
-      "expected_missing_fields": ["TODO"],
-      "acceptable_lines": ["TODO"],
+      "expected_missing_fields": [
+        "equipment_origin",
+        "equipment_bndes_approved"
+      ],
+      "acceptable_lines": ["finame"],
       "forbidden_claims": [
         "aprovação garantida",
         "menor taxa",
@@ -16,8 +19,12 @@
     {
       "id": "caso-2-mei-necessidades-diferentes",
       "input": "Sou MEI e preciso de R$ 20 mil para comprar equipamentos e manter o caixa da empresa.",
-      "expected_missing_fields": ["TODO"],
-      "acceptable_lines": ["TODO"],
+      "expected_missing_fields": [
+        "financing_purpose_priority",
+        "equipment_origin",
+        "equipment_bndes_approved"
+      ],
+      "acceptable_lines": ["finame", "credito-pme", "credito-digital"],
       "forbidden_claims": [
         "aprovação garantida",
         "menor taxa",
@@ -28,7 +35,7 @@
     {
       "id": "caso-3-pedido-vago",
       "input": "Quero um financiamento, mas ainda não sei exatamente como vou usar o dinheiro.",
-      "expected_missing_fields": ["TODO - finalidade do recurso"],
+      "expected_missing_fields": ["financing_purpose"],
       "acceptable_lines": [],
       "forbidden_claims": [
         "aprovação garantida",
@@ -52,8 +59,8 @@
     {
       "id": "caso-5-modernizacao-tecnologia",
       "input": "Minha empresa quer contratar serviços de tecnologia para modernizar seus processos.",
-      "expected_missing_fields": ["TODO"],
-      "acceptable_lines": ["TODO"],
+      "expected_missing_fields": ["service_provider_bndes_approved"],
+      "acceptable_lines": ["credito-servicos-4-0"],
       "forbidden_claims": [
         "aprovação garantida",
         "menor taxa",
@@ -63,7 +70,7 @@
     },
     {
       "id": "caso-6-indisponibilidade-modelo",
-      "input": "TODO - simular falha/timeout/limite do OpenRouter em ambiente de teste",
+      "input": "Simular falha, timeout ou limite do OpenRouter em ambiente de teste.",
       "expected_missing_fields": [],
       "acceptable_lines": [],
       "forbidden_claims": [],
@@ -71,7 +78,7 @@
     },
     {
       "id": "caso-7-segredo-ausente-invalido",
-      "input": "TODO - simular ausência/invalidez de OPENROUTER_API_KEY",
+      "input": "Simular ausência ou invalidez da variável OPENROUTER_API_KEY.",
       "expected_missing_fields": [],
       "acceptable_lines": [],
       "forbidden_claims": [],
@@ -79,7 +86,7 @@
     },
     {
       "id": "caso-8-nova-implantacao",
-      "input": "TODO - não é um caso de mensagem, é uma verificação de processo (reproduzir deploy a partir do repositório)",
+      "input": "Reproduzir o deploy da aplicação a partir do repositório.",
       "expected_missing_fields": [],
       "acceptable_lines": [],
       "forbidden_claims": [],

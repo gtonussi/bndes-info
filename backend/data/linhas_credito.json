@@ -4,54 +4,54 @@
   "linhas": [
     {
       "id": "finame",
-      "name": "TODO - ex: BNDES Finame",
-      "target_audience": "TODO - para quem serve (ex: empresas de todos os portes que compram máquinas/equipamentos)",
-      "what_it_finances": "TODO - o que pode ser financiado",
-      "conditions_limitations": "TODO - condições/limitações importantes (ex: equipamento novo, nacional, credenciado)",
-      "how_to_apply": "TODO - como solicitar (ex: via agente financeiro credenciado)",
+      "name": "BNDES Finame",
+      "target_audience": "Empresas sediadas no país, fundações, associações, cooperativas, entidades e órgãos públicos.",
+      "what_it_finances": "Produção e aquisição de máquinas, equipamentos, bens de informática e automação e bens industrializados empregados no exercício da atividade econômica do cliente. Na linha BK Aquisição e Comercialização, também pode ser financiado capital de giro associado (até 30% do valor financiado).",
+      "conditions_limitations": "Os bens financiados devem ser novos, de fabricação nacional e credenciados pelo BNDES. Cada instituição financeira credenciada pode aderir ou não à linha de financiamento de acordo com suas próprias políticas. A decisão final sobre a aceitação ou recusa da proposta é do agente financeiro.",
+      "how_to_apply": "Micro, pequenas e médias empresas podem enviar a solicitação pelo Canal MPME. Também é possível solicitar o financiamento por meio de uma instituição financeira credenciada, que analisará a documentação, as garantias e a possibilidade de concessão do crédito.",
       "source": {
-        "url": "TODO - link exato da página oficial do produto",
+        "url": "https://www.bndes.gov.br/wps/portal/site/home/financiamento/produto/bndes-finame-todos",
         "publisher": "BNDES",
-        "consulted_at": "TODO - YYYY-MM-DD"
+        "consulted_at": "2026-08-18"
       }
     },
     {
       "id": "credito-pme",
-      "name": "TODO - ex: BNDES Crédito Pequenas e Médias Empresas",
-      "target_audience": "TODO",
-      "what_it_finances": "TODO - ex: capital de giro / manutenção da atividade",
-      "conditions_limitations": "TODO",
-      "how_to_apply": "TODO",
+      "name": "BNDES Crédito Pequenas e Médias Empresas",
+      "target_audience": "Micro, pequenas e médias empresas e empresários individuais classificados pelo BNDES dentro dos limites de porte estabelecidos pela instituição.",
+      "what_it_finances": "Capital de giro destinado à manutenção da atividade empresarial e à geração e manutenção de empregos.",
+      "conditions_limitations": "Limite de financiamento de até R$ 20 milhões por ano, por grupo econômico. A aprovação depende da análise do agente financeiro.",
+      "how_to_apply": "Solicitação realizada por meio de instituição financeira credenciada pelo BNDES.",
       "source": {
-        "url": "TODO",
+        "url": "https://www.bndes.gov.br/wps/portal/site/home/financiamento/produto/bndes-credito-pequenas-e-medias-empresas",
         "publisher": "BNDES",
-        "consulted_at": "TODO - YYYY-MM-DD"
+        "consulted_at": "2026-08-18"
       }
     },
     {
       "id": "credito-servicos-4-0",
-      "name": "TODO - ex: BNDES Crédito Serviços 4.0",
-      "target_audience": "TODO",
-      "what_it_finances": "TODO - ex: serviços tecnológicos, digitalização, modernização",
-      "conditions_limitations": "TODO",
-      "how_to_apply": "TODO",
+      "name": "BNDES Crédito Serviços 4.0",
+      "target_audience": "Empresas sediadas no país, administração pública (exceto a União) e produtores rurais.",
+      "what_it_finances": "Contratação de serviços tecnológicos credenciados pelo BNDES associados à manufatura enxuta, digitalização, Internet das Coisas (IoT), manufatura avançada, desenvolvimento tecnológico de novos produtos e processos, tecnologias industriais básicas e eficiência produtiva e energética. Também permite capital de giro de até 20% do valor total financiado.",
+      "conditions_limitations": "Os serviços devem ser prestados por fornecedores credenciados pelo BNDES. Cada instituição financeira decide, de acordo com sua política própria, se oferece ou não a linha. A decisão final sobre a aprovação é do agente financeiro.",
+      "how_to_apply": "Solicitação realizada junto a uma instituição financeira credenciada, responsável pela análise da documentação, negociação das garantias e encaminhamento da operação ao BNDES.",
       "source": {
-        "url": "TODO",
+        "url": "https://www.bndes.gov.br/wps/portal/site/home/financiamento/produto/bndes-credito-servicos-4.0",
         "publisher": "BNDES",
-        "consulted_at": "TODO - YYYY-MM-DD"
+        "consulted_at": "2026-08-18"
       }
     },
     {
       "id": "credito-digital",
-      "name": "TODO - ex: BNDES Crédito Digital",
-      "target_audience": "TODO - ex: MEIs, micro, pequenas e médias empresas",
-      "what_it_finances": "TODO",
-      "conditions_limitations": "TODO",
-      "how_to_apply": "TODO - ex: contratado digitalmente via agente financeiro credenciado",
+      "name": "BNDES Crédito Digital",
+      "target_audience": "Microempreendedores individuais (MEI), micro, pequenas e médias empresas, incluindo pessoas jurídicas de direito privado e empresários individuais classificados pelo BNDES nesses portes.",
+      "what_it_finances": "A página do produto consultada não descreve explicitamente as finalidades financiáveis na seção principal apresentada.",
+      "conditions_limitations": "Contratação realizada em ambiente integralmente digital. O produto não contempla entidades de classe, sindicatos, federações, confederações sindicais, organizações religiosas, partidos políticos e clubes. Também não contempla empresas que exerçam determinadas atividades econômicas (CNAEs específicos listados pelo BNDES).",
+      "how_to_apply": "Contratado integralmente por meio das plataformas digitais disponibilizadas pelos agentes financeiros credenciados.",
       "source": {
-        "url": "TODO",
+        "url": "https://www.bndes.gov.br/wps/portal/site/home/financiamento/produto/bndes-credito-digital",
         "publisher": "BNDES",
-        "consulted_at": "TODO - YYYY-MM-DD"
+        "consulted_at": "2026-08-18"
       }
     }
   ]
