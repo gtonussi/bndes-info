@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { logger } from "../core/logger.js";
 
 export interface CreditLineSource {
   url: string;
@@ -93,5 +94,11 @@ export function loadCreditLines(
     );
   }
 
-  return parsed.linhas.map(toCreditLine);
+  const creditLines = parsed.linhas.map(toCreditLine);
+  logger.info("Credit lines loaded", {
+    domain: "knowledge_base",
+    count: creditLines.length,
+    ids: creditLines.map((line) => line.id),
+  });
+  return creditLines;
 }

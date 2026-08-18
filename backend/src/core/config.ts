@@ -1,3 +1,5 @@
+import { logger } from "./logger.js";
+
 export interface AppConfig {
   openRouterApiKey: string;
   openRouterModelPrimary: string;
@@ -19,7 +21,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("OPENROUTER_TIMEOUT_MS deve ser um número positivo.");
   }
 
-  return {
+  const config = {
     openRouterApiKey,
     openRouterModelPrimary,
     openRouterModelFallback: env.OPENROUTER_MODEL_FALLBACK?.trim() || undefined,
@@ -27,4 +29,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       env.OPENROUTER_BASE_URL?.trim() || "https://openrouter.ai/api/v1",
     requestTimeoutMs,
   };
+
+  logger.info("Configuration loaded", {
+    domain: "config",
+    modelPrimary: config.openRouterModelPrimary,
+    hasFallbackModel: Boolean(config.openRouterModelFallback),
+    requestTimeoutMs: config.requestTimeoutMs,
+    baseUrl: config.openRouterBaseUrl,
+  });
+
+  return config;
 }

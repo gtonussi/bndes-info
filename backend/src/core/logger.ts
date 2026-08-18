@@ -1,4 +1,17 @@
+export type LogDomain =
+  | "server"
+  | "http"
+  | "config"
+  | "health"
+  | "chat"
+  | "prompt"
+  | "openrouter"
+  | "recommendation"
+  | "validation"
+  | "knowledge_base";
+
 export interface LogContext {
+  domain?: LogDomain;
   requestId?: string;
   userId?: string;
   [key: string]: unknown;
@@ -31,7 +44,8 @@ export function createLogger(
     msg: string,
     ctx?: LogContext,
   ) => {
-    const line = `${color}[${levelName.toUpperCase()}]${ANSI.reset} ${ANSI.dim}${now()}${ANSI.reset} ${msg}${serializeContext(ctx)}`;
+    const domain = ctx?.domain ?? "server";
+    const line = `${color}[${levelName.toUpperCase()}]${ANSI.reset} ${ANSI.dim}${now()}${ANSI.reset} [${domain}] ${msg}${serializeContext(ctx)}`;
     console[method](line);
   };
 

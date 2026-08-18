@@ -25,6 +25,8 @@ interface ChatCompletionResponse {
   choices?: Array<{ message?: { content?: string | null } }>;
 }
 
+type ResponseFormat = "json_object";
+
 const EXTRACTION_SYSTEM_PROMPT = `Você extrai dados de pedidos sobre financiamento BNDES.
 Responda SOMENTE JSON válido, sem markdown, com este formato:
 {"financingPurpose":[],"financingPurposePriority":null,"companySize":"unknown","equipmentOrigin":"unknown","equipmentBndesApproved":"unknown","serviceProviderBndesApproved":"unknown","asksGuaranteeOrRate":false}
@@ -42,7 +44,18 @@ export class OpenRouterClient {
   }
 
   async extractProfile(userMessage: string): Promise<ExtractionResult> {
-    const content = await this.complete(EXTRACTION_SYSTEM_PROMPT, userMessage);
+    logger.debug("Prompt selected", {
+      domain: "prompt",
+      prompt: "profile_extraction",
+      version: "v1-inline",
+      inputLength: userMessage.length,
+    });
+    const content = await this.complete(
+      EXTRACTION_SYSTEM_PROMPT,
+      userMessage,
+      "json_object",
+      "profile_extraction",
+    );
     return parseExtraction(content);
   }
 
@@ -62,12 +75,25 @@ Não inclua um disclaimer em uma simples pergunta de esclarecimento. Quando apre
       "Contexto confiável da aplicação:",
       creditLinesSummary,
     ].join("\n\n");
-    return this.complete(systemPrompt, promptContext);
+    logger.debug("Prompt selected", {
+      domain: "prompt",
+      prompt: "recommendation_explanation",
+      version: "v1-inline",
+      inputLength: promptContext.length,
+    });
+    return this.complete(
+      systemPrompt,
+      promptContext,
+      undefined,
+      "recommendation_explanation",
+    );
   }
 
   private async complete(
     systemPrompt: string,
     userMessage: string,
+    responseFormat?: ResponseFormat,
+    operation?: "profile_extraction" | "recommendation_explanation",
   ): Promise<string> {
     const models = [
       this.config.openRouterModelPrimary,
@@ -77,17 +103,31 @@ Não inclua um disclaimer em uma simples pergunta de esclarecimento. Quando apre
 
     for (const model of models) {
       const startedAt = performance.now();
-      logger.info("model request started", { model });
+      logger.info("OpenRouter request started", {
+        domain: "openrouter",
+        model,
+        operation: operation ?? "unknown",
+        responseFormat: responseFormat ?? "text",
+      });
       try {
-        const result = await this.request(model, systemPrompt, userMessage);
-        logger.info("model request succeeded", {
+        const result = await this.request(
           model,
+          systemPrompt,
+          userMessage,
+          responseFormat,
+        );
+        logger.info("model request succeeded", {
+          domain: "openrouter",
+          model,
+          operation: operation ?? "unknown",
           durationMs: Math.round(performance.now() - startedAt),
         });
         return result;
       } catch (error) {
         logger.warn("model request failed; trying next model", {
+          domain: "openrouter",
           model,
+          operation: operation ?? "unknown",
           durationMs: Math.round(performance.now() - startedAt),
           error: error instanceof Error ? error.message : "unknown error",
         });
@@ -105,6 +145,7 @@ Não inclua um disclaimer em uma simples pergunta de esclarecimento. Quando apre
     model: string,
     systemPrompt: string,
     userMessage: string,
+    responseFormat?: ResponseFormat,
   ): Promise<string> {
     const controller = new AbortController();
     const timeout = setTimeout(
@@ -113,6 +154,19 @@ Não inclua um disclaimer em uma simples pergunta de esclarecimento. Quando apre
     );
 
     try {
+      const body: Record<string, unknown> = {
+        model,
+        temperature: 0,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
+      };
+
+      if (responseFormat) {
+        body.response_format = { type: responseFormat };
+      }
+
       const response = await this.transport(
         `${this.config.openRouterBaseUrl}/chat/completions`,
         {
@@ -123,15 +177,7 @@ Não inclua um disclaimer em uma simples pergunta de esclarecimento. Quando apre
             "HTTP-Referer": "https://bndes-info.local",
             "X-Title": "BNDES Info",
           },
-          body: JSON.stringify({
-            model,
-            temperature: 0,
-            response_format: { type: "json_object" },
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userMessage },
-            ],
-          }),
+          body: JSON.stringify(body),
           signal: controller.signal,
         },
       );

@@ -37,12 +37,14 @@ export function createApp(
     const requestPath = req.path;
     (req as any).requestId = requestId;
     logger.request("request started", {
+      domain: "http",
       requestId,
       method: req.method,
       path: requestPath,
     });
     req.res?.on("finish", () => {
       logger.request("request finished", {
+        domain: "http",
         requestId,
         method: req.method,
         path: requestPath,
@@ -58,7 +60,7 @@ export function createApp(
 
   // Error handler
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    logger.error("Unhandled error", { error: err });
+    logger.error("Unhandled error", { domain: "server", error: err });
     const errorMessage =
       err instanceof Error ? err.message : "Internal server error";
     const isProviderUnavailable = errorMessage.startsWith(

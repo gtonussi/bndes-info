@@ -8,10 +8,16 @@ const app = createApp(config);
 const port = Number(process.env.PORT ?? 3000);
 
 app.listen(port, () => {
-  logger.info(`Server started`, { port, nodeEnv: process.env.NODE_ENV });
+  logger.info("Server started", {
+    domain: "server",
+    port,
+    nodeEnv: process.env.NODE_ENV ?? "development",
+  });
 });
 
 process.on("SIGTERM", () => {
-  logger.info("SIGTERM received, shutting down gracefully");
+  logger.info("SIGTERM received, shutting down gracefully", {
+    domain: "server",
+  });
   process.exit(0);
 });

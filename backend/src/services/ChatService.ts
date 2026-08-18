@@ -38,6 +38,7 @@ export class ChatService {
 
     try {
       logger.info("Chat request received", {
+        domain: "chat",
         conversationId,
         requestId,
         messageLength: request.message.length,
@@ -47,6 +48,7 @@ export class ChatService {
       const extractionInput = this.buildExtractionInput(request);
       const profile = await this.client.extractProfile(extractionInput);
       logger.info("profile extracted", {
+        domain: "chat",
         conversationId,
         requestId,
         purposes: profile.financingPurpose,
@@ -61,13 +63,18 @@ export class ChatService {
           `Modo: recusar premissa. Responda em no máximo dois parágrafos curtos. Explique que aprovação e taxa dependem da análise do agente financeiro e redirecione para a finalidade do financiamento. Não repita a pergunta inteira nem liste linhas sem contexto.`,
           request.message,
         );
-        logger.info("Premise refused", { conversationId, requestId });
+        logger.info("Premise refused", {
+          domain: "chat",
+          conversationId,
+          requestId,
+        });
         return this.finalizeResponse(conversationId, response, []);
       }
 
       // Passo 3: passar pelo Recommendation Engine
       const recommendation = recommend(profile, this.creditLines);
       logger.info("recommendation evaluated", {
+        domain: "recommendation",
         conversationId,
         requestId,
         status: recommendation.status,
@@ -88,6 +95,7 @@ export class ChatService {
           request.message,
         );
         logger.info("Asking for more info", {
+          domain: "chat",
           conversationId,
           requestId,
           missingFields: recommendation.missingFields,
@@ -101,7 +109,11 @@ export class ChatService {
           "Modo: sem correspondência. Explique em duas frases que nenhuma linha foi relacionada com segurança ao pedido atual e faça uma pergunta objetiva para descobrir a finalidade. Não invente uma linha alternativa.",
           request.message,
         );
-        logger.info("No match found", { conversationId, requestId });
+        logger.info("No match found", {
+          domain: "recommendation",
+          conversationId,
+          requestId,
+        });
         return this.finalizeResponse(conversationId, response, []);
       }
 
@@ -125,6 +137,7 @@ export class ChatService {
       });
 
       logger.info("Chat completed", {
+        domain: "chat",
         conversationId,
         requestId,
         candidateCount: recommendation.candidates.length,
@@ -136,7 +149,12 @@ export class ChatService {
         requestId,
       );
     } catch (error) {
-      logger.error("Chat error", { conversationId, requestId, error });
+      logger.error("Chat error", {
+        domain: "chat",
+        conversationId,
+        requestId,
+        error,
+      });
       throw error;
     }
   }
@@ -182,6 +200,7 @@ export class ChatService {
     const validated = validateOutput(message, this.creditLines);
     if (!validated.isValid) {
       logger.warn("Output validation failed", {
+        domain: "validation",
         conversationId,
         requestId,
         violations: validated.violations,
@@ -194,6 +213,7 @@ export class ChatService {
       };
     }
     logger.info("response validated", {
+      domain: "validation",
       conversationId,
       requestId,
       citations: citations.length,
