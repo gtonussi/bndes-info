@@ -4,6 +4,8 @@ Assistente que ajuda empresas a entender quais linhas de crédito do BNDES podem
 
 Stack: backend Node/Express em TypeScript (`backend/`), frontend React + Vite em TypeScript (`frontend/`).
 
+Consulte [COMO_FUNCIONA.md](COMO_FUNCIONA.md) para uma explicação detalhada do fluxo, das responsabilidades de cada módulo e de como a aplicação usa a knowledge base e o OpenRouter.
+
 ## Estrutura do repositório
 
 ```
