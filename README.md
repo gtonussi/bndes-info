@@ -6,6 +6,8 @@ Stack: backend Node/Express em TypeScript (`backend/`), frontend React + Vite em
 
 Consulte [ARCHITECTURE.md](DOCS/ARCHITECTURE.md) para uma explicação detalhada do fluxo, das responsabilidades de cada módulo e de como a aplicação usa a knowledge base e o OpenRouter.
 
+Para publicar no Azure dentro das limitações dos planos gratuitos, consulte [docs/DEPLOYMENT_AZURE.md](docs/DEPLOYMENT_AZURE.md).
+
 ## Estrutura do repositório
 
 ```
@@ -94,6 +96,7 @@ As demais variáveis já possuem valores locais adequados:
 | `OPENROUTER_BASE_URL`       | Endpoint do OpenRouter             | `https://openrouter.ai/api/v1` |
 | `PORT`                      | Porta do backend                   | `3000`                         |
 | `LOG_LEVEL`                 | Nível dos logs                     | `info`                         |
+| `CORS_ORIGIN`               | Origem permitida pelo CORS         | `*` somente fora de produção   |
 
 O backend carrega `.env` automaticamente ao iniciar. Nunca envie esse arquivo para o Git ou coloque a chave no frontend.
 
@@ -182,6 +185,7 @@ O `npm test` do backend não chama o OpenRouter real: os testes usam transportes
 - **`OPENROUTER_MODEL_PRIMARY não configurado`**: preencha um model ID válido no OpenRouter.
 - **Frontend em branco ou `404`**: encerre o Vite, entre em `frontend` e execute apenas `npm run dev`.
 - **Erro de conexão no chat**: confirme que o backend está rodando na porta `3000` e que `frontend/.env` mantém `VITE_API_URL=` vazio.
+- **`CORS_ORIGIN deve ser configurada em produção`**: configure no App Service a URL exata do Static Web Apps, sem `/` no final.
 - **Porta ocupada**: encerre o processo que usa `3000` ou `5173`, ou altere `PORT` no backend e o proxy em `frontend/vite.config.ts` de forma correspondente.
 - **Timeout do OpenRouter**: verifique conectividade, validade da chave, disponibilidade do modelo e `OPENROUTER_TIMEOUT_MS`.
 

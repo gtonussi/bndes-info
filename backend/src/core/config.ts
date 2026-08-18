@@ -6,6 +6,7 @@ export interface AppConfig {
   openRouterModelFallback?: string;
   openRouterBaseUrl: string;
   requestTimeoutMs: number;
+  corsOrigin: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -21,6 +22,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("OPENROUTER_TIMEOUT_MS deve ser um número positivo.");
   }
 
+  const corsOrigin = env.CORS_ORIGIN?.trim() || "*";
+  if (env.NODE_ENV === "production" && corsOrigin === "*") {
+    throw new Error("CORS_ORIGIN deve ser configurada em produção.");
+  }
+
   const config = {
     openRouterApiKey,
     openRouterModelPrimary,
@@ -28,6 +34,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     openRouterBaseUrl:
       env.OPENROUTER_BASE_URL?.trim() || "https://openrouter.ai/api/v1",
     requestTimeoutMs,
+    corsOrigin,
   };
 
   logger.info("Configuration loaded", {
@@ -36,6 +43,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     hasFallbackModel: Boolean(config.openRouterModelFallback),
     requestTimeoutMs: config.requestTimeoutMs,
     baseUrl: config.openRouterBaseUrl,
+    corsOrigin: config.corsOrigin,
   });
 
   return config;
