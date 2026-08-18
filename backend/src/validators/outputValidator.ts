@@ -18,7 +18,10 @@ export interface ValidatedResponse {
   violations: string[];
 }
 
-export function validateOutput(response: string, creditLines: CreditLine[]): ValidatedResponse {
+export function validateOutput(
+  response: string,
+  creditLines: CreditLine[],
+): ValidatedResponse {
   const violations: string[] = [];
   const lowerResponse = response.toLowerCase();
   const validUrls = new Set(creditLines.map((line) => line.source.url));

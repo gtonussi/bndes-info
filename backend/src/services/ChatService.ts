@@ -1,10 +1,13 @@
+import type { AppConfig } from "../core/config.js";
+import { logger } from "../core/logger.js";
 import type { CreditLine } from "../knowledgeBase/loadCreditLines.js";
 import { loadCreditLines } from "../knowledgeBase/loadCreditLines.js";
-import { OpenRouterClient, type ExtractionResult } from "../modelGateway/openRouterClient.js";
-import { validateOutput } from "../validators/outputValidator.js";
+import {
+  OpenRouterClient,
+  type ExtractionResult,
+} from "../modelGateway/openRouterClient.js";
 import { recommend } from "../recommendationEngine/rulesEngine.js";
-import { logger } from "../core/logger.js";
-import type { AppConfig } from "../core/config.js";
+import { validateOutput } from "../validators/outputValidator.js";
 
 export interface ChatRequest {
   message: string;
@@ -32,7 +35,11 @@ export class ChatService {
     const requestId = Math.random().toString(36).slice(2, 11);
 
     try {
-      logger.info("Chat request received", { conversationId, requestId, messageLength: request.message.length });
+      logger.info("Chat request received", {
+        conversationId,
+        requestId,
+        messageLength: request.message.length,
+      });
 
       // Passo 1: extrair perfil da empresa
       const profile = await this.client.extractProfile(request.message);
@@ -53,9 +60,19 @@ export class ChatService {
 
       // Passo 4: se ainda faltam dados (caso 3), pedir mais informações
       if (recommendation.status === "needs_more_info") {
-        const questionSummary = this.generateQuestion(recommendation.missingFields, profile);
-        const response = await this.client.explainRecommendation(questionSummary, request.message);
-        logger.info("Asking for more info", { conversationId, requestId, missingFields: recommendation.missingFields });
+        const questionSummary = this.generateQuestion(
+          recommendation.missingFields,
+          profile,
+        );
+        const response = await this.client.explainRecommendation(
+          questionSummary,
+          request.message,
+        );
+        logger.info("Asking for more info", {
+          conversationId,
+          requestId,
+          missingFields: recommendation.missingFields,
+        });
         return this.toResponse(conversationId, response, []);
       }
 
@@ -85,7 +102,11 @@ export class ChatService {
       // Passo 7: validar a resposta
       const validated = validateOutput(explanation, this.creditLines);
       if (!validated.isValid) {
-        logger.warn("Output validation failed", { conversationId, requestId, violations: validated.violations });
+        logger.warn("Output validation failed", {
+          conversationId,
+          requestId,
+          violations: validated.violations,
+        });
       }
 
       const citations = recommendation.candidates.map((cand) => {
@@ -93,7 +114,11 @@ export class ChatService {
         return { url: line.source.url, date: line.source.consultedAt };
       });
 
-      logger.info("Chat completed", { conversationId, requestId, candidateCount: recommendation.candidates.length });
+      logger.info("Chat completed", {
+        conversationId,
+        requestId,
+        candidateCount: recommendation.candidates.length,
+      });
       return this.toResponse(conversationId, explanation, citations);
     } catch (error) {
       logger.error("Chat error", { conversationId, requestId, error });
@@ -101,20 +126,30 @@ export class ChatService {
     }
   }
 
-  private generateQuestion(missingFields: string[], profile: ExtractionResult): string {
+  private generateQuestion(
+    missingFields: string[],
+    profile: ExtractionResult,
+  ): string {
     const fieldLabels: Record<string, string> = {
-      financing_purpose: "a finalidade do crédito (compra de equipamentos, capital de giro, etc.)",
-      financing_purpose_priority: "qual é a prioridade entre as finalidades mencionadas",
+      financing_purpose:
+        "a finalidade do crédito (compra de equipamentos, capital de giro, etc.)",
+      financing_purpose_priority:
+        "qual é a prioridade entre as finalidades mencionadas",
       equipment_origin: "se o equipamento é novo, usado ou importado",
       equipment_bndes_approved: "se o equipamento está credenciado pelo BNDES",
-      service_provider_bndes_approved: "se o prestador de serviço está credenciado pelo BNDES",
+      service_provider_bndes_approved:
+        "se o prestador de serviço está credenciado pelo BNDES",
     };
 
     const fields = missingFields.map((f) => fieldLabels[f] || f).join(", ");
     return `Para refinar as recomendações, você poderia esclarecer: ${fields}?`;
   }
 
-  private toResponse(conversationId: string, message: string, citations: Array<{ url: string; date: string }>): ChatResponse {
+  private toResponse(
+    conversationId: string,
+    message: string,
+    citations: Array<{ url: string; date: string }>,
+  ): ChatResponse {
     return { message, citations, conversationId };
   }
 }

@@ -45,7 +45,10 @@ export class OpenRouterClient {
     return parseExtraction(content);
   }
 
-  async explainRecommendation(creditLinesSummary: string, userProfile: string): Promise<string> {
+  async explainRecommendation(
+    creditLinesSummary: string,
+    userProfile: string,
+  ): Promise<string> {
     const systemPrompt = `Você é um assistente que explica recomendações de linhas de crédito do BNDES em português.
 Responda em texto natural, claro e sem usar markdown.
 Sempre cite a fonte e a data de consulta da informação.

@@ -1,7 +1,12 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import express, {
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
+import type { AppConfig } from "./core/config.js";
 import { logger } from "./core/logger.js";
 import { ChatService } from "./services/ChatService.js";
-import type { AppConfig } from "./core/config.js";
 
 export function createApp(config: AppConfig): Express {
   const app = express();
@@ -20,8 +25,16 @@ export function createApp(config: AppConfig): Express {
   app.post("/chat", async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { message } = req.body as { message?: string };
-      if (!message || typeof message !== "string" || message.trim().length === 0) {
-        return res.status(400).json({ error: "message é obrigatório e deve ser uma string não-vazia" });
+      if (
+        !message ||
+        typeof message !== "string" ||
+        message.trim().length === 0
+      ) {
+        return res
+          .status(400)
+          .json({
+            error: "message é obrigatório e deve ser uma string não-vazia",
+          });
       }
 
       const response = await chatService.chat({ message: message.trim() });
@@ -44,10 +57,10 @@ export function createApp(config: AppConfig): Express {
   // Error handler
   app.use((err: unknown, _req: Request, res: Response) => {
     logger.error("Unhandled error", { error: err });
-    const message = err instanceof Error ? err.message : "Internal server error";
+    const message =
+      err instanceof Error ? err.message : "Internal server error";
     res.status(500).json({ error: message });
   });
 
   return app;
 }
-
