@@ -130,6 +130,189 @@ Pontos para destacar no Draw.io:
 - O modelo principal possui timeout e pode usar um modelo fallback.
 - Links e alegacoes sensiveis sao validados antes de chegar ao usuario.
 
+### Versao alternativa do diagrama 1: leitura guiada
+
+Esta e uma segunda representacao do mesmo fluxo. Ela foi organizada como uma historia em sete passos, para facilitar a explicacao em uma apresentacao. A versao anterior pode continuar como referencia tecnica detalhada; para o Draw.io, esta versao tende a ser mais simples de ler da esquerda para a direita.
+
+```text
+    1. USUARIO EXPLICA A NECESSIDADE
+    +--------------------------------------------+
+    | "Quero comprar uma maquina para a empresa"|
+    +----------------------+---------------------+
+                                                 |
+                                                 v
+    2. FRONTEND ENVIA A MENSAGEM
+    +--------------------------------------------+
+    | React envia POST /chat                      |
+    | - mensagem                                  |
+    | - ID da conversa, se ja existir             |
+    | - ultimas mensagens da conversa             |
+    +----------------------+---------------------+
+                                                 |
+                                                 v
+    3. BACKEND CONFERE O PEDIDO
+    +--------------------------------------------+
+    | A rota valida:                              |
+    | - existe uma mensagem?                      |
+    | - o historico tem formato valido?           |
+    | - ha no maximo 10 itens no historico?       |
+    +----------------------+---------------------+
+                                                 |
+                                                 v
+    4. LLM TRANSFORMA TEXTO EM DADOS ESTRUTURADOS
+    +--------------------------------------------+        +-----------------------------------+
+    | ChatService prepara o contexto             |------->| OpenRouter - LLM de extracao      |
+    | com a mensagem e o historico               |        | Pede somente um objeto JSON        |
+    +--------------------------------------------+        +-----------------+-----------------+
+                                                                                                                                             |
+                                                                                                                                             v
+                                                                                                        +-----------------------------------+
+                                                                                                        | Perfil estruturado                |
+                                                                                                        | - finalidade do credito           |
+                                                                                                        | - porte da empresa                |
+                                                                                                        | - origem/credenciamento do bem    |
+                                                                                                        | - pedido de taxa ou aprovacao?    |
+                                                                                                        +-----------------+-----------------+
+                                                                                                                                            |
+                                        Se a LLM falhar, exceder o timeout ou nao devolver JSON
+                                                                                                                                            |
+                                                                                                                                            v
+                                                                                                        +-----------------------------------+
+                                                                                                        | Tentar modelo fallback            |
+                                                                                                        | Se tambem falhar: devolver 503    |
+                                                                                                        +-----------------------------------+
+                                                                                                                                            |
+                                                                                                                                            v
+    5. CODIGO DECIDE; A LLM NAO DECIDE ELEGIBILIDADE
+    +--------------------------------------------+        +-----------------------------------+
+    | Knowledge base                              |------->| Motor de regras                    |
+    | linhas_credito.json                         |        | Usa perfil JSON + fatos BNDES      |
+    | Dados e fontes oficiais                     |        | Decide candidatos e pendencias      |
+    +--------------------------------------------+        +-----------------+-----------------+
+                                                                                                                                            |
+                                                                                                                                            v
+                                                                                                        +-----------------------------------+
+                                                                                                        | Resultado da decisao              |
+                                                                                                        |                                  |
+                                                                                                        | [A] Premissa inadequada           |
+                                                                                                        | [B] Faltam informacoes            |
+                                                                                                        | [C] Nenhuma linha se aplica       |
+                                                                                                        | [D] Linhas candidatas prontas    |
+                                                                                                        +-----------------+-----------------+
+                                                                                                                                            |
+                                +---------------------+-----------------------------+------------------------------+
+                                |                     |                             |                              |
+                                v                     v                             v                              v
+            +-------------------+ +---------------------+     +---------------------+      +------------------------+
+            | [A] Recusar       | | [B] Perguntar       |     | [C] Explicar que    |      | [D] Montar contexto     |
+            | garantia/taxa e   | | somente o que falta |     | nao ha correspond.  |      | apenas das linhas        |
+            | redirecionar      | | para orientar       |     | e pedir finalidade  |      | candidatas da KB         |
+            +---------+---------+ +----------+----------+     +----------+----------+      +-----------+------------+
+                                |                      |                           |                           |
+                                +----------------------+---------------------------+---------------------------+
+                                                                                                                                            |
+                                                                                                                                            v
+    6. LLM REDIGE A RESPOSTA, COM LIMITES CLAROS
+    +-----------------------------------------------------------------------------------------------+
+    | OpenRouter - LLM de resposta                                                                  |
+    | - recebe a instrucao definida pelo resultado das regras                                       |
+    | - em recomendacoes, recebe somente fatos e fontes das linhas candidatas                      |
+    | - nao pode inventar taxas, prazos, garantias ou criterios                                    |
+    +-----------------------------------------------+-----------------------------------------------+
+                                                                                                    |
+                                                                                                    v
+    7. BACKEND PROTEGE A RESPOSTA ANTES DE EXIBIR
+    +-----------------------------------------------+       +-----------------------------------------+
+    | validateOutput()                              |------>| Resposta ao frontend                    |
+    | - bloqueia promessas de aprovacao/taxa        |       | - mensagem em linguagem natural         |
+    | - aceita apenas URLs oficiais da knowledge base|       | - citacoes de fontes oficiais            |
+    | - usa texto seguro se a validacao falhar      |       | - conversationId                         |
+    +-----------------------------------------------+       +-----------------------------------------+
+```
+
+Roteiro curto para explicar este desenho:
+
+1. A pessoa descreve o que precisa em linguagem natural.
+2. A primeira chamada de LLM so organiza essa mensagem em campos controlados.
+3. O motor de regras, usando a base oficial do BNDES, toma a decisao sem delegar elegibilidade ao modelo.
+4. A segunda chamada de LLM apenas transforma a decisao em uma resposta clara para a pessoa.
+5. Antes de responder, o backend verifica promessas indevidas e links que nao fazem parte das fontes oficiais.
+
+### Versao recomendada para apresentacao: fluxo vertical
+
+Esta terceira leitura do diagrama 1 preserva o mesmo funcionamento, mas reduz a quantidade de setas paralelas. No Draw.io, use uma coluna central de sete caixas e apenas quatro saidas pequenas no passo de decisao.
+
+```text
+    +------------------------------------------------------------+
+    | 1. USUARIO                                                 |
+    | Descreve a necessidade em linguagem natural.               |
+    | Ex.: "Quero comprar uma maquina para a minha empresa."    |
+    +-----------------------------+------------------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 2. FRONTEND (React)                                        |
+    | Envia POST /chat com a mensagem, o ID da conversa e        |
+    | as ultimas mensagens do historico.                         |
+    +-----------------------------+------------------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 3. API E ORQUESTRACAO (Express + ChatService)              |
+    | Valida a requisicao e prepara a mensagem para processamento.|
+    +-----------------------------+------------------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 4. LLM #1: EXTRACAO                                         |
+    | OpenRouter transforma texto em um perfil JSON controlado:  |
+    | finalidade, porte, origem/credenciamento e sinais de risco.|
+    |                                                            |
+    | Falhou, demorou demais ou nao devolveu JSON?                |
+    | -> tenta o modelo fallback; se falhar, responde HTTP 503.  |
+    +-----------------------------+------------------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 5. DECISAO EM CODIGO (sem LLM)                             |
+    | rulesEngine combina o perfil JSON com a knowledge base     |
+    | oficial do BNDES e decide candidatos ou pendencias.        |
+    +-----------------------------+------------------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 6. QUAL E O PROXIMO PASSO?                                 |
+    +------------------------------------------------------------+
+             |                     |                    |              |
+             v                     v                    v              v
+    +-----------+        +-----------+       +-----------+   +----------------+
+    | Premissa  |        | Faltam    |       | Sem linha |   | Candidatos     |
+    | inadequada|        | dados     |       | compativel|   | prontos        |
+    +-----+-----+        +-----+-----+       +-----+-----+   +--------+-------+
+                |                    |                   |                  |
+                +--------------------+-------------------+------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 7. LLM #2: RESPOSTA EM LINGUAGEM NATURAL                   |
+    | Redige, conforme a decisao:                                |
+    | - recusa uma promessa de taxa/aprovacao;                   |
+    | - pergunta somente o dado que falta;                       |
+    | - explica que nao encontrou correspondencia; ou            |
+    | - explica candidatos usando apenas fatos da knowledge base.|
+    +-----------------------------+------------------------------+
+                                                                |
+                                                                v
+    +------------------------------------------------------------+
+    | 8. VALIDACAO E ENTREGA                                      |
+    | validateOutput() bloqueia promessas indevidas e URLs fora  |
+    | das fontes oficiais. O frontend recebe mensagem, citacoes  |
+    | e conversationId para exibir no chat.                      |
+    +------------------------------------------------------------+
+```
+
+Frase central para apresentar: "A LLM entende e explica; o codigo decide e valida."
+
 ## 2. Conversao: texto do usuario para JSON e JSON para resposta
 
 Use este diagrama para detalhar a parte mais ligada a LLM. Ele separa claramente o JSON que a LLM produz do JSON HTTP que a aplicacao devolve ao frontend.
@@ -381,12 +564,12 @@ Pontos para destacar no Draw.io:
 
 ## Legenda de responsabilidades
 
-| Componente | Responsabilidade no fluxo |
-| --- | --- |
-| Frontend React | Coleta a mensagem, mantem o historico local, envia requisicoes e exibe respostas/citacoes. |
-| Chat route | Valida o contrato HTTP antes de chamar o servico. |
-| ChatService | Coordena knowledge base, LLM, motor de regras e validacao. |
-| Knowledge base | Armazena fatos e fontes oficiais BNDES que podem ser usados no contexto e nas citacoes. |
-| OpenRouter client | Isola as chamadas a LLM, o formato JSON, timeout e fallback de modelo. |
-| Rules engine | Decide candidatos e pendencias por regras em codigo, sem delegar elegibilidade a LLM. |
-| Output validator | Bloqueia afirmacoes proibidas e URLs fora da allow-list da knowledge base. |
+| Componente        | Responsabilidade no fluxo                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Frontend React    | Coleta a mensagem, mantem o historico local, envia requisicoes e exibe respostas/citacoes. |
+| Chat route        | Valida o contrato HTTP antes de chamar o servico.                                          |
+| ChatService       | Coordena knowledge base, LLM, motor de regras e validacao.                                 |
+| Knowledge base    | Armazena fatos e fontes oficiais BNDES que podem ser usados no contexto e nas citacoes.    |
+| OpenRouter client | Isola as chamadas a LLM, o formato JSON, timeout e fallback de modelo.                     |
+| Rules engine      | Decide candidatos e pendencias por regras em codigo, sem delegar elegibilidade a LLM.      |
+| Output validator  | Bloqueia afirmacoes proibidas e URLs fora da allow-list da knowledge base.                 |
