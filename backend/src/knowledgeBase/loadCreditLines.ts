@@ -42,6 +42,30 @@ const DEFAULT_DATA_PATH = join(
 );
 
 function toCreditLine(raw: RawCreditLine): CreditLine {
+  const requiredFields: Array<keyof RawCreditLine> = [
+    "id",
+    "name",
+    "target_audience",
+    "what_it_finances",
+    "conditions_limitations",
+    "how_to_apply",
+  ];
+  for (const field of requiredFields) {
+    if (typeof raw[field] !== "string" || raw[field].trim().length === 0) {
+      throw new Error(`Linha de crédito inválida: campo "${field}" ausente.`);
+    }
+  }
+  if (
+    !raw.source ||
+    raw.source.publisher !== "BNDES" ||
+    !raw.source.url.startsWith("https://www.bndes.gov.br/") ||
+    !raw.source.consulted_at
+  ) {
+    throw new Error(
+      `Linha de crédito inválida: fonte oficial ausente para "${raw.id}".`,
+    );
+  }
+
   return {
     id: raw.id,
     name: raw.name,

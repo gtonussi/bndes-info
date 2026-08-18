@@ -4,61 +4,121 @@ import { ChatWindow, type ChatMessage } from "./components/ChatWindow";
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 export default function App() {
-	const [messages, setMessages] = useState<ChatMessage[]>([]);
-	const [conversationId, setConversationId] = useState<string>();
-	const [isSending, setIsSending] = useState(false);
-	const [error, setError] = useState<string>();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string>();
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string>();
 
-	async function sendMessage(content: string) {
-		const history = messages.map(({ role, content: text }) => ({ role, content: text }));
-		setMessages((current) => [...current, { role: "user", content }]);
-		setError(undefined);
-		setIsSending(true);
+  async function sendMessage(content: string) {
+    const history = messages.map(({ role, content: text }) => ({
+      role,
+      content: text,
+    }));
+    setMessages((current) => [...current, { role: "user", content }]);
+    setError(undefined);
+    setIsSending(true);
 
-		try {
-			const response = await fetch(`${API_URL}/chat`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ message: content, conversationId, conversationHistory: history }),
-			});
-			const payload = (await response.json()) as { message?: string; citations?: ChatMessage["citations"]; conversationId?: string; error?: string };
-			if (!response.ok) throw new Error(payload.error ?? "Não foi possível consultar o assistente.");
+    try {
+      const response = await fetch(`${API_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: content,
+          conversationId,
+          conversationHistory: history,
+        }),
+      });
+      const payload = (await response.json()) as {
+        message?: string;
+        citations?: ChatMessage["citations"];
+        conversationId?: string;
+        error?: string;
+      };
+      if (!response.ok)
+        throw new Error(
+          payload.error ?? "Não foi possível consultar o assistente.",
+        );
 
-			setConversationId(payload.conversationId);
-			setMessages((current) => [...current, { role: "assistant", content: payload.message ?? "Não recebi uma resposta válida.", citations: payload.citations }]);
-		} catch (requestError) {
-			setError(requestError instanceof Error ? requestError.message : "Não foi possível consultar o assistente.");
-		} finally {
-			setIsSending(false);
-		}
-	}
+      setConversationId(payload.conversationId);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: payload.message ?? "Não recebi uma resposta válida.",
+          citations: payload.citations,
+        },
+      ]);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Não foi possível consultar o assistente.",
+      );
+    } finally {
+      setIsSending(false);
+    }
+  }
 
-	function startNewConversation() {
-		setMessages([]);
-		setConversationId(undefined);
-		setError(undefined);
-	}
+  function startNewConversation() {
+    setMessages([]);
+    setConversationId(undefined);
+    setError(undefined);
+  }
 
-	return (
-		<main className="app-shell">
-			<div className="grain" aria-hidden="true" />
-			<header className="topbar">
-				<div className="brand-mark" aria-hidden="true">B</div>
-				<div><p className="eyebrow">BNDES · ORIENTAÇÃO</p><h1>BNDES Info</h1></div>
-				<button className="new-chat-button" onClick={startNewConversation} type="button"><span aria-hidden="true">+</span> Nova conversa</button>
-			</header>
-			<section className="workspace">
-				<aside className="intro-panel">
-					<span className="section-number">01</span>
-					<p className="kicker">Seu próximo passo</p>
-					<h2>Encontre clareza antes de pedir crédito.</h2>
-					<p className="intro-copy">Descreva o que sua empresa precisa financiar. Eu organizo as possibilidades com base em informações oficiais do BNDES.</p>
-					<div className="trust-note"><span className="trust-dot" /><span>Orientação baseada em fontes oficiais</span></div>
-					<div className="rule-list"><div><strong>Não aprova</strong><span>Crédito ou cadastro</span></div><div><strong>Não promete</strong><span>Taxas ou condições</span></div></div>
-				</aside>
-				<ChatWindow messages={messages} isSending={isSending} error={error} onSend={sendMessage} />
-			</section>
-			<footer className="footer-note">As condições finais dependem da análise de elegibilidade e do agente financeiro.</footer>
-		</main>
-	);
+  return (
+    <main className="app-shell">
+      <div className="grain" aria-hidden="true" />
+      <header className="topbar">
+        <div className="brand-mark" aria-hidden="true">
+          B
+        </div>
+        <div>
+          <p className="eyebrow">BNDES · ORIENTAÇÃO</p>
+          <h1>BNDES Info</h1>
+        </div>
+        <button
+          className="new-chat-button"
+          onClick={startNewConversation}
+          type="button"
+        >
+          <span aria-hidden="true">+</span> Nova conversa
+        </button>
+      </header>
+      <section className="workspace">
+        <aside className="intro-panel">
+          <span className="section-number">01</span>
+          <p className="kicker">Seu próximo passo</p>
+          <h2>Encontre clareza antes de pedir crédito.</h2>
+          <p className="intro-copy">
+            Descreva o que sua empresa precisa financiar. Eu organizo as
+            possibilidades com base em informações oficiais do BNDES.
+          </p>
+          <div className="trust-note">
+            <span className="trust-dot" />
+            <span>Orientação baseada em fontes oficiais</span>
+          </div>
+          <div className="rule-list">
+            <div>
+              <strong>Não aprova</strong>
+              <span>Crédito ou cadastro</span>
+            </div>
+            <div>
+              <strong>Não promete</strong>
+              <span>Taxas ou condições</span>
+            </div>
+          </div>
+        </aside>
+        <ChatWindow
+          messages={messages}
+          isSending={isSending}
+          error={error}
+          onSend={sendMessage}
+        />
+      </section>
+      <footer className="footer-note">
+        As condições finais dependem da análise de elegibilidade e do agente
+        financeiro.
+      </footer>
+    </main>
+  );
 }

@@ -1,1 +1,17 @@
-// TODO: GET /health - responde 200 se o processo esta de pe e o segredo obrigatorio esta presente.
+import { Router, type Request, type Response } from "express";
+import type { AppConfig } from "../../core/config.js";
+
+export function createHealthRouter(config: AppConfig): Router {
+  const router = Router();
+
+  router.get("/", (_req: Request, res: Response) => {
+    const hasApiKey = config.openRouterApiKey.trim().length > 0;
+    return res.status(hasApiKey ? 200 : 503).json({
+      status: hasApiKey ? "ok" : "degraded",
+      uptime: process.uptime(),
+      openRouterApiKey: hasApiKey ? "present" : "missing",
+    });
+  });
+
+  return router;
+}

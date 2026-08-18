@@ -2,9 +2,11 @@ import type { CreditLine } from "../knowledgeBase/loadCreditLines.js";
 
 const FORBIDDEN_PHRASES = [
   "aprovação garantida",
-  "aprovado",
+  "aprovação é garantida",
   "menor taxa",
-  "taxa de",
+  "aprovação certa",
+  "está aprovado",
+  "foi aprovado",
   "está garantido",
   "será aprovado",
   "você conseguirá",
@@ -35,8 +37,9 @@ export function validateOutput(
   const urlPattern = /(https:\/\/[^\s)]+)/gi;
   const urlMatches = response.match(urlPattern) || [];
   for (const url of urlMatches) {
-    if (!validUrls.has(url)) {
-      violations.push(`URL fora da allow-list: ${url}`);
+    const normalizedUrl = url.replace(/[.,!?;:]+$/, "");
+    if (!validUrls.has(normalizedUrl)) {
+      violations.push(`URL fora da allow-list: ${normalizedUrl}`);
     }
   }
 

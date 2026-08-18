@@ -2,11 +2,7 @@
 
 Assistente que ajuda empresas a entender quais linhas de crédito do BNDES podem fazer sentido para sua necessidade. Não aprova crédito, não define taxa nem garante condições — apenas orienta com base em fontes oficiais.
 
-# bndes-info
-
-Assistente que ajuda empresas a entender quais linhas de crédito do BNDES podem fazer sentido para sua necessidade. Não aprova crédito, não define taxa nem garante condições — apenas orienta com base em fontes oficiais.
-
-Stack: backend Node/Express em TypeScript (`backend/`), frontend React + Vite + Tailwind em TypeScript (`frontend/`).
+Stack: backend Node/Express em TypeScript (`backend/`), frontend React + Vite em TypeScript (`frontend/`).
 
 ## Estrutura do repositório
 
@@ -24,8 +20,8 @@ bndes-info/
 │       ├── server.ts                 # ponto de entrada, sobe o servidor HTTP
 │       ├── app.ts                    # instância do Express, middlewares e rotas
 │       ├── api/routes/
-│       │   ├── chat.routes.ts        # POST /chat - orquestra extração -> Engine -> explicação -> validator
-│       │   └── health.routes.ts      # GET /health
+│       │   ├── chat.routes.ts        # valida o contrato HTTP de POST /chat
+│       │   └── health.routes.ts      # GET /health e estado da configuração
 │       ├── core/
 │       │   ├── config.ts             # carrega e valida variáveis de ambiente
 │       │   └── logger.ts             # logging estruturado, sem PII/conversas completas
@@ -41,16 +37,15 @@ bndes-info/
     ├── package.json
     ├── tsconfig.json
     ├── vite.config.ts
-    ├── tailwind.config.ts
-    ├── postcss.config.js
+    ├── .env.example                  # VITE_API_URL opcional
     ├── index.html
     └── src/
         ├── main.tsx                  # monta <App /> no #root
         ├── App.tsx                   # componente raiz, chama a API do backend
-        ├── index.css                 # diretivas do Tailwind
+        ├── index.css                 # estilos da aplicação
         └── components/
-            ├── ChatWindow.tsx        # lista de mensagens + input do usuário
-            └── MessageBubble.tsx     # renderiza uma mensagem, com citação de fonte quando houver
+            ├── ChatWindow.tsx        # mensagens, sugestões e composer
+            └── MessageBubble.tsx     # mensagem com citações oficiais
 ```
 
 ## Como instalar e rodar
@@ -61,16 +56,35 @@ Pré-requisitos: Node.js 20+.
 # Backend
 cd backend
 npm install
-cp .env.example .env   # preencher OPENROUTER_API_KEY e demais variáveis
+npm run build
+cp .env.example .env   # preencher OPENROUTER_API_KEY e OPENROUTER_MODEL_PRIMARY
 npm run dev             # sobe a API local (ex: http://localhost:3000)
 
 # Frontend (em outro terminal)
 cd frontend
 npm install
+npm run build
 npm run dev             # sobe o Vite dev server (ex: http://localhost:5173)
 ```
 
-> Os scripts (`dev`, `build`, `start`) e as dependências ainda são placeholders no `package.json` — serão preenchidos conforme a implementação avança. Instruções de deploy em cloud (Azure) serão adicionadas quando essa etapa for implementada.
+O frontend usa `VITE_API_URL`. Em desenvolvimento, deixe a variável vazia para usar o proxy do Vite para `http://localhost:3000`. Em produção, informe a URL pública do backend. A chave do OpenRouter é usada exclusivamente no backend.
+
+## API
+
+- `POST /chat`: recebe `message`, `conversationId` opcional e até 10 turnos em `conversationHistory`.
+- `GET /health`: retorna `200` quando a configuração essencial está disponível e `503` quando a chave do OpenRouter está ausente.
+
+As respostas incluem `conversationId`, mensagem e citações das fontes oficiais utilizadas. O sistema não aprova crédito, não promete taxas e não substitui a análise do agente financeiro.
+
+## Technical Architecture
+
+- `server.ts` carrega `.env` com `dotenv`, valida a configuração e inicializa o Express.
+- `app.ts` registra JSON, CORS, logging, routers e o middleware de erro. `ChatService` é injetável para testes HTTP.
+- `chat.routes.ts` valida o payload e encaminha a requisição ao `ChatService`. O serviço mantém o `conversationId`, limita o histórico e executa extração, regras, explicação e validação.
+- `OpenRouterClient` concentra as chamadas externas, usa `fetch` nativo, timeout com `AbortController`, JSON estruturado, modelo fallback e `OpenRouterTransport` injetável nos testes.
+- `rulesEngine.ts` recebe apenas um perfil tipado e decide candidatos e campos ausentes. `loadCreditLines.ts` carrega o JSON e exige fontes BNDES válidas.
+- `outputValidator.ts` aplica allow-list de URLs e bloqueia promessas de aprovação ou taxa antes que a resposta chegue ao frontend.
+- O frontend chama somente `/chat`; não conhece a chave do OpenRouter e renderiza mensagens, estados de erro, histórico e citações.
 
 ## Architecture Decisions
 
