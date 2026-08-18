@@ -2,7 +2,7 @@
 
 ## Representação Visual
 
-<a href="docs/VisualDiagram.png"><img src="docs/VisualDiagram.png" alt="Representação visual do diagrama de arquitetura" width="200"></a>
+<a href="VisualDiagram.png"><img src="VisualDiagram.png" alt="Representação visual do diagrama de arquitetura" width="200"></a>
 
 ## 1. Fluxo de IA: da mensagem do usuario ate a resposta
 
