@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChatWindow, type ChatMessage } from "./components/ChatWindow";
+import { frontendLogger } from "./core/logger";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -18,6 +19,7 @@ export default function App() {
   const [error, setError] = useState<string>();
 
   async function sendMessage(content: string) {
+    const startedAt = performance.now();
     const history = messages.map(({ role, content: text }) => ({
       role,
       content: text,
@@ -25,6 +27,11 @@ export default function App() {
     setMessages((current) => [...current, { role: "user", content }]);
     setError(undefined);
     setIsSending(true);
+    frontendLogger.info("chat request started", {
+      messageLength: content.length,
+      historyTurns: history.length,
+      hasConversation: Boolean(conversationId),
+    });
 
     const controller = new AbortController();
     const timeout = window.setTimeout(
@@ -66,6 +73,11 @@ export default function App() {
           citations: payload.citations,
         },
       ]);
+      frontendLogger.info("chat request succeeded", {
+        status: response.status,
+        durationMs: Math.round(performance.now() - startedAt),
+        citations: payload.citations?.length ?? 0,
+      });
     } catch (requestError) {
       const message =
         requestError instanceof DOMException &&
@@ -75,6 +87,10 @@ export default function App() {
             ? requestError.message
             : "Não foi possível consultar o assistente.";
       setError(message);
+      frontendLogger.error("chat request failed", {
+        durationMs: Math.round(performance.now() - startedAt),
+        reason: message,
+      });
     } finally {
       window.clearTimeout(timeout);
       setIsSending(false);
@@ -85,6 +101,7 @@ export default function App() {
     setMessages([]);
     setConversationId(undefined);
     setError(undefined);
+    frontendLogger.info("conversation reset");
   }
 
   return (

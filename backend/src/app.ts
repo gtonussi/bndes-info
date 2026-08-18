@@ -33,8 +33,23 @@ export function createApp(
   });
   app.use((req, _res, next) => {
     const requestId = Math.random().toString(36).slice(2, 11);
+    const startedAt = performance.now();
+    const requestPath = req.path;
     (req as any).requestId = requestId;
-    logger.debug("Request", { requestId, method: req.method, path: req.path });
+    logger.request("request started", {
+      requestId,
+      method: req.method,
+      path: requestPath,
+    });
+    req.res?.on("finish", () => {
+      logger.request("request finished", {
+        requestId,
+        method: req.method,
+        path: requestPath,
+        status: req.res?.statusCode,
+        durationMs: Math.round(performance.now() - startedAt),
+      });
+    });
     next();
   });
 

@@ -1,4 +1,5 @@
 import type { AppConfig } from "../core/config.js";
+import { logger } from "../core/logger.js";
 import type {
   CompanySize,
   EquipmentOrigin,
@@ -68,9 +69,21 @@ Sempre inclua um disclaimer: "Esta indicação não representa aprovação de cr
     let lastError: unknown;
 
     for (const model of models) {
+      const startedAt = performance.now();
+      logger.info("model request started", { model });
       try {
-        return await this.request(model, systemPrompt, userMessage);
+        const result = await this.request(model, systemPrompt, userMessage);
+        logger.info("model request succeeded", {
+          model,
+          durationMs: Math.round(performance.now() - startedAt),
+        });
+        return result;
       } catch (error) {
+        logger.warn("model request failed; trying next model", {
+          model,
+          durationMs: Math.round(performance.now() - startedAt),
+          error: error instanceof Error ? error.message : "unknown error",
+        });
         lastError = error;
       }
     }

@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { frontendLogger } from "../core/logger";
 import { MessageBubble } from "./MessageBubble";
 
 export interface ChatMessage {
@@ -27,15 +28,15 @@ export function ChatWindow({
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(
-    () => endRef.current?.scrollIntoView({ behavior: "smooth" }),
-    [messages, isSending],
-  );
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isSending]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     const message = draft.trim();
     if (!message || isSending) return;
+    frontendLogger.info("message submitted", { messageLength: message.length });
     setDraft("");
     await onSend(message);
     composerRef.current?.focus();
@@ -65,7 +66,12 @@ export function ChatWindow({
                   key={suggestion}
                   type="button"
                   disabled={isSending}
-                  onClick={() => void onSend(suggestion)}
+                  onClick={() => {
+                    frontendLogger.info("suggestion selected", {
+                      messageLength: suggestion.length,
+                    });
+                    void onSend(suggestion);
+                  }}
                 >
                   {suggestion}
                   <span aria-hidden="true">↗</span>

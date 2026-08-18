@@ -46,7 +46,14 @@ export class ChatService {
       // Passo 1: extrair perfil da empresa
       const extractionInput = this.buildExtractionInput(request);
       const profile = await this.client.extractProfile(extractionInput);
-      logger.debug("Profile extracted", { conversationId, requestId, profile });
+      logger.info("profile extracted", {
+        conversationId,
+        requestId,
+        purposes: profile.financingPurpose,
+        companySize: profile.companySize,
+        asksGuaranteeOrRate: profile.asksGuaranteeOrRate,
+        historyTurns: request.conversationHistory?.length ?? 0,
+      });
 
       // Passo 2: recusar premissa inadequada (caso 4)
       if (profile.asksGuaranteeOrRate) {
@@ -60,6 +67,15 @@ export class ChatService {
 
       // Passo 3: passar pelo Recommendation Engine
       const recommendation = recommend(profile, this.creditLines);
+      logger.info("recommendation evaluated", {
+        conversationId,
+        requestId,
+        status: recommendation.status,
+        candidateIds: recommendation.candidates.map(
+          (candidate) => candidate.id,
+        ),
+        missingFields: recommendation.missingFields,
+      });
 
       // Passo 4: se ainda faltam dados (caso 3), pedir mais informações
       if (recommendation.status === "needs_more_info") {
@@ -177,6 +193,12 @@ export class ChatService {
         citations,
       };
     }
+    logger.info("response validated", {
+      conversationId,
+      requestId,
+      citations: citations.length,
+      messageLength: message.length,
+    });
     return { conversationId, message: validated.message, citations };
   }
 

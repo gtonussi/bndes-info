@@ -4,24 +4,46 @@ export interface LogContext {
   [key: string]: unknown;
 }
 
+const ANSI = {
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
+  cyan: "\x1b[36m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  red: "\x1b[31m",
+  magenta: "\x1b[35m",
+};
+
+function serializeContext(context?: LogContext): string {
+  if (!context || Object.keys(context).length === 0) return "";
+  return ` ${ANSI.dim}${JSON.stringify(context)}${ANSI.reset}`;
+}
+
 export function createLogger(
   logLevel: "debug" | "info" | "warn" | "error" = "info",
 ) {
   const level = { debug: 0, info: 1, warn: 2, error: 3 }[logLevel];
   const now = () => new Date().toISOString();
+  const write = (
+    method: "log" | "warn" | "error",
+    color: string,
+    levelName: string,
+    msg: string,
+    ctx?: LogContext,
+  ) => {
+    const line = `${color}[${levelName.toUpperCase()}]${ANSI.reset} ${ANSI.dim}${now()}${ANSI.reset} ${msg}${serializeContext(ctx)}`;
+    console[method](line);
+  };
 
   return {
     debug: (msg: string, ctx?: LogContext) => {
-      if (level <= 0)
-        console.log(JSON.stringify({ ts: now(), level: "debug", msg, ...ctx }));
+      if (level <= 0) write("log", ANSI.cyan, "debug", msg, ctx);
     },
     info: (msg: string, ctx?: LogContext) => {
-      if (level <= 1)
-        console.log(JSON.stringify({ ts: now(), level: "info", msg, ...ctx }));
+      if (level <= 1) write("log", ANSI.green, "info", msg, ctx);
     },
     warn: (msg: string, ctx?: LogContext) => {
-      if (level <= 2)
-        console.warn(JSON.stringify({ ts: now(), level: "warn", msg, ...ctx }));
+      if (level <= 2) write("warn", ANSI.yellow, "warn", msg, ctx);
     },
     error: (msg: string, ctx?: LogContext & { error?: unknown }) => {
       if (level <= 3) {
@@ -29,17 +51,11 @@ export function createLogger(
           ctx?.error instanceof Error
             ? { errorName: ctx.error.name, errorMsg: ctx.error.message }
             : undefined;
-        console.error(
-          JSON.stringify({
-            ts: now(),
-            level: "error",
-            msg,
-            ...ctx,
-            ...errorInfo,
-          }),
-        );
+        write("error", ANSI.red, "error", msg, { ...ctx, ...errorInfo });
       }
     },
+    request: (msg: string, ctx?: LogContext) =>
+      write("log", ANSI.magenta, "http", msg, ctx),
   };
 }
 
