@@ -45,6 +45,15 @@ export class OpenRouterClient {
     return parseExtraction(content);
   }
 
+  async explainRecommendation(creditLinesSummary: string, userProfile: string): Promise<string> {
+    const systemPrompt = `Você é um assistente que explica recomendações de linhas de crédito do BNDES em português.
+Responda em texto natural, claro e sem usar markdown.
+Sempre cite a fonte e a data de consulta da informação.
+Nunca use frases como "aprovação garantida", "menor taxa", "está garantido" ou similares.
+Sempre inclua um disclaimer: "Esta indicação não representa aprovação de crédito. Aprovação e condições finais dependem da análise de elegibilidade e do agente financeiro."`;
+    return this.complete(systemPrompt, creditLinesSummary);
+  }
+
   private async complete(
     systemPrompt: string,
     userMessage: string,

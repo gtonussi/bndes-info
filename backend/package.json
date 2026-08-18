@@ -6,15 +6,18 @@
   "description": "API Backend - assistente de linhas de credito BNDES (Node/Express/TypeScript)",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "TODO - ex: tsx watch src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "TODO - ex: node dist/server.js",
-    "test": "tsx tests/rulesEngine.test.ts && tsx tests/openRouterClient.test.ts"
+    "start": "node dist/server.js",
+    "test": "tsx tests/rulesEngine.test.ts && tsx tests/openRouterClient.test.ts && tsx tests/chatService.e2e.test.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.21.0"
+  },
   "devDependencies": {
-    "typescript": "^5.6.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.20.1",
     "tsx": "^4.19.0",
-    "@types/node": "^22.9.0"
+    "typescript": "^5.6.0"
   }
 }
